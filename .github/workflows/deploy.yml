@@ -30,7 +30,7 @@ jobs:
         uses: denoland/deployctl@v1
         with:
           project: "dime-to-dozen"
-          entrypoint: "main.ts"
-          root: "dist"
-          
-          
+          entrypoint: "server/main.ts"
+          include: |
+            server
+            dist
