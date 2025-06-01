@@ -3,13 +3,15 @@
     "dev": "deno run -A --node-modules-dir npm:vite",
     "build": "deno run -A --node-modules-dir npm:vite build",
     "preview": "deno run -A --node-modules-dir npm:vite preview",
-    "serve": "deno run --allow-net --allow-read jsr:@std/http@1/file-server dist/"
+    "serve": "deno run --allow-net --allow-read main.ts"
   },
   "compilerOptions": {
     "lib": ["ES2020", "DOM", "DOM.Iterable"]
   },
   "imports": {
+    "@deno/deployctl": "jsr:@deno/deployctl@^1.13.1",
     "@deno/vite-plugin": "npm:@deno/vite-plugin@^1.0.4",
+    "@std/http": "jsr:@std/http@^1.0.17",
     "@vitejs/plugin-vue": "npm:@vitejs/plugin-vue@^5.2.1",
     "vite": "npm:vite@^6.1.1",
     "vue": "npm:vue@^3.5.13"
