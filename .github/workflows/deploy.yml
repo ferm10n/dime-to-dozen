@@ -34,3 +34,5 @@ jobs:
           include: |
             server
             dist
+            deno.json
+            deno.lock
