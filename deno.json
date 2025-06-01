@@ -9,7 +9,6 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"]
   },
   "imports": {
-    "@deno/deployctl": "jsr:@deno/deployctl@^1.13.1",
     "@deno/vite-plugin": "npm:@deno/vite-plugin@^1.0.4",
     "@std/http": "jsr:@std/http@^1.0.17",
     "@vitejs/plugin-vue": "npm:@vitejs/plugin-vue@^5.2.1",
