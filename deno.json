@@ -4,10 +4,15 @@
     "build": "deno run -A --node-modules-dir npm:vite build",
     "preview": "deno run -A --node-modules-dir npm:vite preview",
     "serve": "deno run --allow-env --allow-net --allow-read server/main.ts",
-    "db:push": "deno --env -A --node-modules-dir npm:drizzle-kit push"
+    "db:push": "deno --env -A --node-modules-dir npm:drizzle-kit push",
+    "deploy": "deployctl deploy '--include=dist,server,deno.*' --project=dime-to-dozen --entrypoint=server/main.ts --prod"
   },
   "compilerOptions": {
-    "lib": ["ES2020", "DOM", "DOM.Iterable"]
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ]
   },
   "imports": {
     "@deno/vite-plugin": "npm:@deno/vite-plugin@^1.0.4",
@@ -19,5 +24,17 @@
     "drizzle-orm": "npm:drizzle-orm@^0.44.1",
     "vite": "npm:vite@^6.1.1",
     "vue": "npm:vue@^3.5.13"
+  },
+  "deploy": {
+    "project": "e2c658e2-0ab0-4ea1-b5b6-b2fd2d583d1a",
+    "exclude": [
+      "**/node_modules"
+    ],
+    "include": [
+      "dist",
+      "server",
+      "deno.*"
+    ],
+    "entrypoint": "server/main.ts"
   }
 }
