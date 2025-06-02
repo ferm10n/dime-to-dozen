@@ -2,7 +2,7 @@
 import "@std/dotenv/load";
 import { serveDir } from "@std/http/file-server";
 import { db } from "./db/index.ts";
-import { expensesTable } from "./db/schema.ts";
+import { expenses } from "./db/schema.ts";
 
 // const secret = Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b => b.toString(16).padStart(2, "0")).join("");
 // console.log("Generated secret:", secret);
@@ -26,14 +26,14 @@ Deno.serve({
     });
   } else if (pathname.startsWith("/api/expenses")) {
     if (req.method === "GET") {
-      return jsonResponse(await db.select().from(expensesTable));
+      return jsonResponse(await db.select().from(expenses));
     } else if (req.method === "POST") {
       const body = await req.json();
       const { name, amount, group, created_by } = body;
       if (!name || !amount || !group || !created_by) {
         return new Response("Invalid input", { status: 400 });
       }
-      const createdExpense = await db.insert(expensesTable).values({
+      const createdExpense = await db.insert(expenses).values({
         name,
         amount,
         group,

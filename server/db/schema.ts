@@ -1,6 +1,6 @@
 import { pgTable, varchar, serial, timestamp, text, decimal } from "drizzle-orm/pg-core";
 
-export const expensesTable = pgTable('expense', {
+export const expenses = pgTable('expense', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
   amount: decimal('amount', { precision: 10, scale: 2 }).notNull(),
