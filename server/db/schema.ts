@@ -1,4 +1,5 @@
 import { pgTable, varchar, serial, timestamp, text, decimal } from "drizzle-orm/pg-core";
+import { createInsertSchema } from 'drizzle-zod';
 
 export const expenses = pgTable('expense', {
   id: serial('id').primaryKey(),
@@ -8,3 +9,4 @@ export const expenses = pgTable('expense', {
   created_at: timestamp('created_at').defaultNow().notNull(),
   created_by: text('created_by').notNull(),
 });
+export const expenseInsertSchema = createInsertSchema(expenses);

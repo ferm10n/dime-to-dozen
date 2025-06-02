@@ -18,6 +18,7 @@
     "npm:drizzle-kit@*": "0.31.1_esbuild@0.25.5",
     "npm:drizzle-kit@~0.31.1": "0.31.1_esbuild@0.25.5",
     "npm:drizzle-orm@~0.44.1": "0.44.1_@neondatabase+serverless@1.0.0",
+    "npm:drizzle-zod@~0.8.2": "0.8.2_drizzle-orm@0.44.1__@neondatabase+serverless@1.0.0_zod@3.25.46_@neondatabase+serverless@1.0.0",
     "npm:vite@*": "6.3.5_picomatch@4.0.2",
     "npm:vite@^6.1.1": "6.3.5_picomatch@4.0.2",
     "npm:vue@^3.5.13": "3.5.16"
@@ -587,6 +588,13 @@
         "@neondatabase/serverless"
       ]
     },
+    "drizzle-zod@0.8.2_drizzle-orm@0.44.1__@neondatabase+serverless@1.0.0_zod@3.25.46_@neondatabase+serverless@1.0.0": {
+      "integrity": "sha512-9Do/16OjFFNrQDZgvMtxtDDwKWbFOxUAIwNPKX98SfxrP8H18vhN1BvNXbhelLcdgCE7GEaXDJqBjMExSkhpkA==",
+      "dependencies": [
+        "drizzle-orm",
+        "zod"
+      ]
+    },
     "entities@4.5.0": {
       "integrity": "sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw=="
     },
@@ -822,6 +830,9 @@
     },
     "xtend@4.0.2": {
       "integrity": "sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ=="
+    },
+    "zod@3.25.46": {
+      "integrity": "sha512-IqRxcHEIjqLd4LNS/zKffB3Jzg3NwqJxQQ0Ns7pdrvgGkwQsEBdEQcOHaBVqvvZArShRzI39+aMST3FBGmTrLQ=="
     }
   },
   "workspace": {
@@ -833,6 +844,7 @@
       "npm:@vitejs/plugin-vue@^5.2.1",
       "npm:drizzle-kit@~0.31.1",
       "npm:drizzle-orm@~0.44.1",
+      "npm:drizzle-zod@~0.8.2",
       "npm:vite@^6.1.1",
       "npm:vue@^3.5.13"
     ]

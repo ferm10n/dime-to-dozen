@@ -2,7 +2,7 @@
 import "@std/dotenv/load";
 import { serveDir } from "@std/http/file-server";
 import { db } from "./db/index.ts";
-import { expenses } from "./db/schema.ts";
+import { expenseInsertSchema, expenses } from "./db/schema.ts";
 
 // const secret = Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b => b.toString(16).padStart(2, "0")).join("");
 // console.log("Generated secret:", secret);
@@ -29,16 +29,11 @@ Deno.serve({
       return jsonResponse(await db.select().from(expenses));
     } else if (req.method === "POST") {
       const body = await req.json();
-      const { name, amount, group, created_by } = body;
-      if (!name || !amount || !group || !created_by) {
-        return new Response("Invalid input", { status: 400 });
+      const expenseInsert = expenseInsertSchema.safeParse(body);
+      if (!expenseInsert.success) {
+        return new Response('Invalid input', { status: 400, headers: { 'content-type': 'text/plain' } });
       }
-      const createdExpense = await db.insert(expenses).values({
-        name,
-        amount,
-        group,
-        created_by,
-      }).returning();
+      const createdExpense = await db.insert(expenses).values(expenseInsert.data).returning();
       return jsonResponse(createdExpense);
     }
   }
