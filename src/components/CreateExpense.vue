@@ -2,9 +2,9 @@
 import { ref } from 'vue'
 
 const expenseData = ref({
-  amount: 420.69,
-  name: 'Test expense',
-  group: 'Test group',
+  amount: 0,
+  name: '',
+  group: '',
 })
 
 import { useStore } from '../store'
