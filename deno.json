@@ -20,11 +20,14 @@
     "@std/dotenv": "jsr:@std/dotenv@^0.225.5",
     "@std/http": "jsr:@std/http@^1.0.17",
     "@vitejs/plugin-vue": "npm:@vitejs/plugin-vue@^5.2.1",
+    "@vueuse/core": "npm:@vueuse/core@^13.3.0",
     "drizzle-kit": "npm:drizzle-kit@^0.31.1",
     "drizzle-orm": "npm:drizzle-orm@^0.44.1",
     "drizzle-zod": "npm:drizzle-zod@^0.8.2",
+    "pinia": "npm:pinia@^3.0.2",
     "vite": "npm:vite@^6.1.1",
-    "vue": "npm:vue@^3.5.13"
+    "vue": "npm:vue@^3.5.13",
+    "zod": "npm:zod@^3.25.46"
   },
   "deploy": {
     "project": "e2c658e2-0ab0-4ea1-b5b6-b2fd2d583d1a",
@@ -37,5 +40,6 @@
       "deno.*"
     ],
     "entrypoint": "server/main.ts"
-  }
+  },
+  "nodeModulesDir": "auto"
 }

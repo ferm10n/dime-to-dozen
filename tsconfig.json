@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
-    "lib": ["dom"]
+    "lib": ["dom"],
+    "strict": true,
+    "noImplicitThis": true,
   }
 }

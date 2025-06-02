@@ -1,19 +1,5 @@
-# Vite + Deno + Vue 3 + TypeScript
+# Dime To Dozen
 
-## Running
+Getting exposure to Deno, Vue 3, drizzle, neon, deno-deploy, and a dash of vibe coding, while making something practical.
 
-You need to have Deno v2.0.0 or later installed to run this repo.
-
-Start a dev server:
-
-```
-$ deno task dev
-```
-
-## Deploy
-
-Build production assets:
-
-```
-$ deno task build
-```
+My goal was to prioritize speed with creating a MVP, and simplicity over fanciness. I know the auth system isn't the most amazing thing ever (at least for now)

@@ -3,6 +3,7 @@ import "@std/dotenv/load";
 import { serveDir } from "@std/http/file-server";
 import { db } from "./db/index.ts";
 import { expenseInsertSchema, expenses } from "./db/schema.ts";
+import { z } from "zod/v4";
 
 // const secret = Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b => b.toString(16).padStart(2, "0")).join("");
 // console.log("Generated secret:", secret);
@@ -16,29 +17,67 @@ function jsonResponse (payload: unknown) {
   });
 }
 
+const passkeySchema = z.object({
+  passkey: z.string(),
+});
+
+const correctPasskey = Deno.env.get("APP_PASSKEY");
+if (!correctPasskey) {
+  throw new Error("APP_PASSKEY environment variable is not set");
+}
+
+function parseOrDie <T>(schema: z.ZodType<T>, data: unknown): T {
+  const result = schema.safeParse(data);
+  if (!result.success) {
+    console.error("Validation error:", result.error);
+    throw new Response("Invalid input", { status: 400, headers: { "content-type": "text/plain" } });
+  }
+  return result.data;
+}
+
+function ensurePasskey (body: unknown) {
+  const { passkey } = parseOrDie(passkeySchema, body);
+  if (passkey !== correctPasskey) {
+    throw new Response("Invalid passkey", { status: 403, headers: { "content-type": "text/plain" } });
+  }
+}
+
 Deno.serve({
   port: parseInt(Deno.env.get("PORT") || "8000", 10),
 }, async (req) => {
-  const pathname = new URL(req.url).pathname;
-  if (pathname.startsWith("/api/hello")) {
-    return new Response("Hello, World!", {
-      headers: { "Content-Type": "text/plain" },
-    });
-  } else if (pathname.startsWith("/api/expenses")) {
-    if (req.method === "GET") {
-      return jsonResponse(await db.select().from(expenses));
-    } else if (req.method === "POST") {
-      const body = await req.json();
-      const expenseInsert = expenseInsertSchema.safeParse(body);
-      if (!expenseInsert.success) {
-        return new Response('Invalid input', { status: 400, headers: { 'content-type': 'text/plain' } });
-      }
-      const createdExpense = await db.insert(expenses).values(expenseInsert.data).returning();
-      return jsonResponse(createdExpense);
+  try {
+    const pathname = new URL(req.url).pathname;
+    if (pathname.startsWith("/api/hello")) {
+      return new Response("Hello, World!", {
+        headers: { "Content-Type": "text/plain" },
+      });
     }
-  }
+    
+    if (pathname.startsWith("/api/expenses")) {
+      const body = await req.json();
+      await ensurePasskey(body);
 
-  return serveDir(req, {
-    fsRoot: "dist",
-  });
+      if (req.method === "GET") {
+        return jsonResponse(await db.select().from(expenses));
+      }
+      
+      if (req.method === "POST") {
+        const expenseInsert = parseOrDie(expenseInsertSchema, body);
+        const createdExpense = await db.insert(expenses).values(expenseInsert).returning();
+        return jsonResponse(createdExpense);
+      }
+  
+    }
+  
+    return serveDir(req, {
+      fsRoot: "dist",
+    });
+  } catch (error) {
+    if (error instanceof Response) {
+      return error;
+    }
+
+    console.error("Error handling request:", error);
+    return new Response("Internal Server Error", { status: 500 });
+  }
 });
