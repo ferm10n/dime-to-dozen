@@ -53,22 +53,20 @@ Deno.serve({
       });
     }
     
-    if (pathname.startsWith("/api/expenses")) {
+    if (pathname === "/api/get-expenses" && req.method === "POST") {
       const body = await req.json();
       await ensurePasskey(body);
-
-      if (req.method === "GET") {
-        return jsonResponse(await db.select().from(expenses));
-      }
-      
-      if (req.method === "POST") {
-        const expenseInsert = parseOrDie(expenseInsertSchema, body);
-        const createdExpense = await db.insert(expenses).values(expenseInsert).returning();
-        return jsonResponse(createdExpense);
-      }
-  
+      return jsonResponse(await db.select().from(expenses));
     }
-  
+    
+    if (pathname === "/api/post-expense" && req.method === "POST") {
+      const body = await req.json();
+      await ensurePasskey(body);
+      const expenseInsert = parseOrDie(expenseInsertSchema, body);
+      const createdExpense = await db.insert(expenses).values(expenseInsert).returning();
+      return jsonResponse(createdExpense);
+    }
+
     return serveDir(req, {
       fsRoot: "dist",
     });

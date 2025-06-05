@@ -11,7 +11,7 @@ import { useStore } from '../store'
 const store = useStore()
 
 function testExpense() {
-  fetch('/api/expenses', {
+  fetch('/api/post-expense', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -39,7 +39,31 @@ function testExpense() {
 }
 
 function viewExpenses() {
-  window.location.href = '/api/expenses';
+  fetch('/api/get-expenses', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      passkey: store.passkey,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log('Fetched expenses:', data)
+      // Display expenses in a more readable format
+      const formattedData = JSON.stringify(data, null, 2)
+      const newWindow = window.open()
+      if (newWindow) {
+        newWindow.document.write(`<pre>${formattedData}</pre>`)
+      } else {
+        alert('Failed to open new window. Please check your popup blocker settings.')
+      }
+    })
+    .catch((error) => {
+      console.error('Error fetching expenses:', error)
+      alert('Failed to fetch expenses. Check console for details.')
+    })
 }
 </script>
 
