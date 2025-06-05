@@ -2,8 +2,9 @@
 import "@std/dotenv/load";
 import { serveDir } from "@std/http/file-server";
 import { db } from "./db/index.ts";
-import { expenseInsertSchema, expenses } from "./db/schema.ts";
+import { expenseInsertSchema, expenses, budgets, budgetInsertSchema } from "./db/schema.ts";
 import { z } from "zod/v4";
+import { and, eq, SQLWrapper } from "drizzle-orm";
 
 // const secret = Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b => b.toString(16).padStart(2, "0")).join("");
 // console.log("Generated secret:", secret);
@@ -41,6 +42,13 @@ function ensurePasskey (body: unknown) {
     throw new Response("Invalid passkey", { status: 403, headers: { "content-type": "text/plain" } });
   }
 }
+
+// Reuse the month schema from budgetInsertSchema
+const budgetMonthSchema = z.object({
+  passkey: z.string(),
+  month: budgetInsertSchema.shape.month,
+  group: budgetInsertSchema.shape.group.optional(),
+});
 
 Deno.serve({
   port: parseInt(Deno.env.get("PORT") || "8000", 10),
@@ -80,6 +88,39 @@ Deno.serve({
       
       // Extract just the group names for a cleaner response
       return jsonResponse(groups.map(g => g.group));
+    }
+
+    // New endpoint to get budgets for a specific month
+    if (pathname === "/api/get-budget" && req.method === "POST") {
+      const body = await req.json();
+      await ensurePasskey(body);
+      
+      // If a month is specified, filter by that month
+      if ("month" in body) {
+        const { month, group } = parseOrDie(budgetMonthSchema, body);
+
+        const filters: SQLWrapper[] = [];
+        filters.push(eq(budgets.month, month));
+        if (group) {
+          filters.push(eq(budgets.group, group));
+        }
+
+        const budgetsForMonth = await db
+          .select()
+          .from(budgets)
+          .where(and(...filters))
+          .orderBy(budgets.group);
+          
+        return jsonResponse(budgetsForMonth);
+      }
+      
+      // If no month specified, return all budgets
+      const allBudgets = await db
+        .select()
+        .from(budgets)
+        .orderBy(budgets.month, budgets.group);
+        
+      return jsonResponse(allBudgets);
     }
 
     return serveDir(req, {
