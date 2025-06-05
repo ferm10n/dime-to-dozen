@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue'
 
 const expenseData = ref({
   amount: 0,
-  name: '',
+  note: '',
   group: '',
 })
 
@@ -58,7 +58,7 @@ function testExpense() {
       console.log('Expense posted:', data);
       expenseData.value = {
         amount: 0,
-        name: '',
+        note: '',
         group: expenseData.value.group, // Keep the last used group
       };
       alert('Expense posted successfully!');
@@ -131,15 +131,6 @@ function viewExpenses() {
   <div class="card">
     <div class="expense-form">
       <h3>Create New Expense</h3>
-      <div class="form-group">
-        <label for="name">Name:</label>
-        <input id="name" v-model="expenseData.name" type="text" />
-      </div>
-      
-      <div class="form-group">
-        <label for="amount">Amount:</label>
-        <input id="amount" v-model="expenseData.amount" type="number" step="0.01" />
-      </div>
       
       <div class="form-group">
         <label for="group">Group:</label>
@@ -148,16 +139,26 @@ function viewExpenses() {
             <option value="" disabled>Select a group</option>
             <option v-for="group in groups" :key="group" :value="group">{{ group }}</option>
           </select>
-          <button v-if="!isAddingNewGroup" type="button" class="new-group-btn" @click="showAddGroupForm">New Group</button>
+          <button v-if="!isAddingNewGroup" type="button" class="emoji-btn" @click="showAddGroupForm" title="Add New Group">➕</button>
           
           <div v-if="isAddingNewGroup" class="new-group-form">
-            <input id="newGroup" v-model="newGroupName" type="text" placeholder="Enter new group name" />
-            <div class="form-actions">
-              <button type="button" @click="addNewGroup">Add</button>
-              <button type="button" @click="cancelAddGroup">Cancel</button>
+            <div class="group-selector">
+              <input id="newGroup" v-model="newGroupName" type="text" placeholder="Enter new group name" />
+              <button type="button" class="emoji-btn" @click="addNewGroup" title="Save">✅</button>
+              <button type="button" class="emoji-btn" @click="cancelAddGroup" title="Cancel">❌</button>
             </div>
           </div>
         </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="amount">Amount:</label>
+        <input id="amount" v-model="expenseData.amount" type="number" step="0.01" />
+      </div>
+      
+      <div class="form-group">
+        <label for="note">Note:</label>
+        <input id="note" v-model="expenseData.note" type="text" />
       </div>
       
       <div class="form-group">
@@ -166,8 +167,12 @@ function viewExpenses() {
       </div>
       
       <div class="form-actions">
-        <button type="button" @click="testExpense()" :disabled="!expenseData.group || !expenseData.name || expenseData.amount <= 0">Post Expense</button>
-        <button type="button" @click="viewExpenses()">View All Expenses</button>
+        <button type="button" @click="testExpense()" :disabled="!expenseData.group || expenseData.amount <= 0" class="action-btn">
+          📝 Post Expense
+        </button>
+        <button type="button" @click="viewExpenses()" class="action-btn">
+          👁️ View All
+        </button>
       </div>
     </div>
   </div>
@@ -213,9 +218,6 @@ function viewExpenses() {
 
 .new-group-form {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 
 .form-actions {
@@ -224,11 +226,27 @@ function viewExpenses() {
   margin-top: 10px;
 }
 
-.new-group-btn {
+.emoji-btn {
   white-space: nowrap;
-  padding: 5px 8px;
-  font-size: 0.8em;
+  padding: 5px 10px;
+  font-size: 1em;
   height: fit-content;
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 0;
+}
+
+.emoji-btn:hover {
+  background: #e0e0e0;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
 }
 
 button {
