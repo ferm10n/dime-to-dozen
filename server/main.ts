@@ -70,6 +70,15 @@ Deno.serve({
     if (pathname === "/api/post-expense" && req.method === "POST") {
       const body = await req.json();
       await ensurePasskey(body);
+      
+      // Check if month is provided, or generate it from current date
+      if (!body.month) {
+        const now = new Date();
+        // Format as YYYY-MM
+        const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        body.month = month;
+      }
+      
       const expenseInsert = parseOrDie(expenseInsertSchema, body);
       const createdExpense = await db.insert(expenses).values(expenseInsert).returning();
       return jsonResponse(createdExpense);

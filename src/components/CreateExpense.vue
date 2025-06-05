@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 
 const expenseData = ref({
   amount: 0,
   note: '',
   group: '',
+  month: '',
 })
 
 const groups = ref<string[]>([]);
@@ -15,8 +16,15 @@ const isLoading = ref(false);
 import { useStore } from '../store'
 const store = useStore()
 
+// Generate the current month in YYYY-MM format
+const currentMonth = computed(() => {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+});
+
 onMounted(() => {
   fetchGroups();
+  expenseData.value.month = currentMonth.value;
 });
 
 function fetchGroups() {
@@ -60,6 +68,7 @@ function testExpense() {
         amount: 0,
         note: '',
         group: expenseData.value.group, // Keep the last used group
+        month: expenseData.value.month, // Keep the last used month
       };
       alert('Expense posted successfully!');
     })
@@ -153,12 +162,17 @@ function viewExpenses() {
       
       <div class="form-group">
         <label for="amount">Amount:</label>
-        <input id="amount" v-model="expenseData.amount" type="number" step="0.01" />
+        <input id="amount" v-model.number="expenseData.amount" type="number" step="0.01" />
       </div>
       
       <div class="form-group">
         <label for="note">Note:</label>
         <input id="note" v-model="expenseData.note" type="text" />
+      </div>
+      
+      <div class="form-group">
+        <label for="month">Month:</label>
+        <input id="month" v-model="expenseData.month" type="month" />
       </div>
       
       <div class="form-group">
