@@ -66,6 +66,21 @@ Deno.serve({
       const createdExpense = await db.insert(expenses).values(expenseInsert).returning();
       return jsonResponse(createdExpense);
     }
+    
+    if (pathname === "/api/get-groups" && req.method === "POST") {
+      const body = await req.json();
+      await ensurePasskey(body);
+      
+      // Query to get distinct groups
+      const groups = await db
+        .select({ group: expenses.group })
+        .from(expenses)
+        .groupBy(expenses.group)
+        .orderBy(expenses.group);
+      
+      // Extract just the group names for a cleaner response
+      return jsonResponse(groups.map(g => g.group));
+    }
 
     return serveDir(req, {
       fsRoot: "dist",

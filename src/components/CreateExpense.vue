@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const expenseData = ref({
   amount: 0,
@@ -7,8 +7,39 @@ const expenseData = ref({
   group: '',
 })
 
+const groups = ref<string[]>([]);
+const isAddingNewGroup = ref(false);
+const newGroupName = ref('');
+const isLoading = ref(false);
+
 import { useStore } from '../store'
 const store = useStore()
+
+onMounted(() => {
+  fetchGroups();
+});
+
+function fetchGroups() {
+  isLoading.value = true;
+  fetch('/api/get-groups', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      passkey: store.passkey,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      groups.value = data;
+      isLoading.value = false;
+    })
+    .catch((error) => {
+      console.error('Error fetching groups:', error);
+      isLoading.value = false;
+    });
+}
 
 function testExpense() {
   fetch('/api/post-expense', {
@@ -24,18 +55,47 @@ function testExpense() {
   })
     .then((response) => response.json())
     .then((data) => {
-      console.log('Expense posted:', data)
+      console.log('Expense posted:', data);
       expenseData.value = {
         amount: 0,
         name: '',
-        group: '',
-      }
-      alert('Expense posted successfully!')
+        group: expenseData.value.group, // Keep the last used group
+      };
+      alert('Expense posted successfully!');
     })
     .catch((error) => {
-      console.error('Error posting expense:', error)
-      alert('Failed to post expense. Check console for details.')
-    })
+      console.error('Error posting expense:', error);
+      alert('Failed to post expense. Check console for details.');
+    });
+}
+
+function showAddGroupForm() {
+  isAddingNewGroup.value = true;
+}
+
+function cancelAddGroup() {
+  isAddingNewGroup.value = false;
+  newGroupName.value = '';
+}
+
+function addNewGroup() {
+  if (newGroupName.value.trim().length < 3) {
+    alert('Group name must be at least 3 characters long');
+    return;
+  }
+  
+  // Add the new group to the existing list
+  if (!groups.value.includes(newGroupName.value)) {
+    groups.value.push(newGroupName.value);
+    groups.value.sort(); // Keep the list alphabetical
+  }
+  
+  // Set the current group to the new group
+  expenseData.value.group = newGroupName.value;
+  
+  // Reset the form
+  isAddingNewGroup.value = false;
+  newGroupName.value = '';
 }
 
 function viewExpenses() {
@@ -50,20 +110,20 @@ function viewExpenses() {
   })
     .then((response) => response.json())
     .then((data) => {
-      console.log('Fetched expenses:', data)
+      console.log('Fetched expenses:', data);
       // Display expenses in a more readable format
-      const formattedData = JSON.stringify(data, null, 2)
-      const newWindow = window.open()
+      const formattedData = JSON.stringify(data, null, 2);
+      const newWindow = window.open();
       if (newWindow) {
-        newWindow.document.write(`<pre>${formattedData}</pre>`)
+        newWindow.document.write(`<pre>${formattedData}</pre>`);
       } else {
-        alert('Failed to open new window. Please check your popup blocker settings.')
+        alert('Failed to open new window. Please check your popup blocker settings.');
       }
     })
     .catch((error) => {
-      console.error('Error fetching expenses:', error)
-      alert('Failed to fetch expenses. Check console for details.')
-    })
+      console.error('Error fetching expenses:', error);
+      alert('Failed to fetch expenses. Check console for details.');
+    });
 }
 </script>
 
@@ -83,7 +143,21 @@ function viewExpenses() {
       
       <div class="form-group">
         <label for="group">Group:</label>
-        <input id="group" v-model="expenseData.group" type="text" />
+        <div class="group-selector">
+          <select v-if="!isAddingNewGroup" id="group" v-model="expenseData.group" :disabled="isLoading">
+            <option value="" disabled>Select a group</option>
+            <option v-for="group in groups" :key="group" :value="group">{{ group }}</option>
+          </select>
+          <button v-if="!isAddingNewGroup" type="button" class="new-group-btn" @click="showAddGroupForm">New Group</button>
+          
+          <div v-if="isAddingNewGroup" class="new-group-form">
+            <input id="newGroup" v-model="newGroupName" type="text" placeholder="Enter new group name" />
+            <div class="form-actions">
+              <button type="button" @click="addNewGroup">Add</button>
+              <button type="button" @click="cancelAddGroup">Cancel</button>
+            </div>
+          </div>
+        </div>
       </div>
       
       <div class="form-group">
@@ -91,8 +165,10 @@ function viewExpenses() {
         <input id="created_by" v-model="store.createdBy" type="text" />
       </div>
       
-      <button type="button" @click="testExpense()">Post Expense</button>
-      <button type="button" @click="viewExpenses()">View All Expenses</button>
+      <div class="form-actions">
+        <button type="button" @click="testExpense()" :disabled="!expenseData.group || !expenseData.name || expenseData.amount <= 0">Post Expense</button>
+        <button type="button" @click="viewExpenses()">View All Expenses</button>
+      </div>
     </div>
   </div>
 </template>
@@ -116,15 +192,51 @@ function viewExpenses() {
   margin-bottom: 5px;
 }
 
-.form-group input {
+.form-group input, .form-group select {
   width: 100%;
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
 
-button {
+.group-selector {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+}
+
+.group-selector select {
+  flex: 1;
+}
+
+.new-group-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
   margin-top: 10px;
+}
+
+.new-group-btn {
+  white-space: nowrap;
+  padding: 5px 8px;
+  font-size: 0.8em;
+  height: fit-content;
+}
+
+button {
   margin-right: 10px;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>
