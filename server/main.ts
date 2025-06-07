@@ -2,7 +2,7 @@
 import "@std/dotenv/load";
 import { serveDir } from "@std/http/file-server";
 import { db } from "./db/index.ts";
-import { expenseInsertSchema, expenses, budgets, budgetInsertSchema } from "./db/schema.ts";
+import { expenseInsertSchema, expenses, budgets, budgetInsertSchema, groups } from "./db/schema.ts";
 import { z } from "zod/v4";
 import { and, eq, SQLWrapper } from "drizzle-orm";
 
@@ -80,6 +80,13 @@ Deno.serve({
       }
       
       const expenseInsert = parseOrDie(expenseInsertSchema, body);
+
+      // ensure the group exists before inserting the expense
+      await db
+        .insert(groups)
+        .values({ group: expenseInsert.group })
+        .onConflictDoNothing();
+
       const createdExpense = await db.insert(expenses).values(expenseInsert).returning();
       return jsonResponse(createdExpense);
     }

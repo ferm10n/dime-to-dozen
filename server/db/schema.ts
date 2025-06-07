@@ -6,11 +6,18 @@ export const monthSchema = z.string().regex(/^\d{4}-\d{2}$/, {
   message: "Month must be in format YYYY-MM" 
 });
 
+export const groups = pgTable('group', {
+  group: varchar('group', { length: 255 }).primaryKey(),
+});
+
 export const expenses = pgTable('expense', {
   id: serial('id').primaryKey(),
   note: text('note').default(''),
   amount: real('amount').notNull(),
-  group: varchar('group', { length: 255 }).notNull(),
+  group: varchar('group', { length: 255 }).notNull().references(() => groups.group, {
+    onDelete: 'restrict',
+    onUpdate: 'cascade',
+  }),
   created_at: timestamp('created_at').defaultNow().notNull(),
   created_by: text('created_by').notNull(),
   month: varchar('month', { length: 7 }).notNull(),
@@ -20,7 +27,10 @@ export const expenses = pgTable('expense', {
 
 export const budgets = pgTable('budget', {
   id: serial('id').primaryKey(),
-  group: varchar('group', { length: 255 }).notNull(),
+  group: varchar('group', { length: 255 }).notNull().references(() => groups.group, {
+    onDelete: 'restrict',
+    onUpdate: 'cascade',
+  }),
   amount: real('amount').notNull(),
   month: varchar('month', { length: 7 }).notNull(), // Format: "YYYY-MM"
 }, table => [
