@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
+import BudgetMeter from './BudgetMeter.vue'
 
 const expenseData = ref({
   amount: 0,
@@ -13,6 +14,8 @@ const isAddingNewGroup = ref(false);
 const newGroupName = ref('');
 const isLoading = ref(false);
 
+const monthGroups = ref<{group: string, spent: number, budgeted: number}[]>([]);
+
 import { useStore } from '../store'
 const store = useStore()
 
@@ -20,6 +23,18 @@ const store = useStore()
 const currentMonth = computed(() => {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+});
+
+const budgeted = computed(() => {
+  if (!expenseData.value.group) return 0;
+  const groupData = monthGroups.value.find(g => g.group === expenseData.value.group);
+  return groupData ? groupData.budgeted : 0;
+});
+
+const spent = computed(() => {
+  if (!expenseData.value.group) return 0;
+  const groupData = monthGroups.value.find(g => g.group === expenseData.value.group);
+  return groupData ? groupData.spent : 0;
 });
 
 onMounted(() => {
@@ -42,9 +57,37 @@ function fetchGroups() {
     .then((data) => {
       groups.value = data;
       isLoading.value = false;
+      
+      // After fetching groups, also fetch the monthly data for the current month
+      fetchMonthGroups(expenseData.value.month);
     })
     .catch((error) => {
       console.error('Error fetching groups:', error);
+      isLoading.value = false;
+    });
+}
+
+// New function to fetch all groups data for a specific month
+function fetchMonthGroups(month: string) {
+  if (!month) return;
+  
+  isLoading.value = true;
+  fetch('/api/get-month-groups', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      month,
+      passkey: store.passkey,
+    }),
+  })
+    .then(res => res.json())
+    .then(data => {
+      monthGroups.value = Array.isArray(data) ? data : [];
+      isLoading.value = false;
+    })
+    .catch((error) => {
+      console.error('Error fetching month groups:', error);
+      monthGroups.value = [];
       isLoading.value = false;
     });
 }
@@ -70,6 +113,10 @@ function testExpense() {
         group: expenseData.value.group, // Keep the last used group
         month: expenseData.value.month, // Keep the last used month
       };
+      
+      // Refresh month data after posting an expense
+      fetchMonthGroups(expenseData.value.month);
+      
       alert('Expense posted successfully!');
     })
     .catch((error) => {
@@ -134,6 +181,13 @@ function viewExpenses() {
       alert('Failed to fetch expenses. Check console for details.');
     });
 }
+
+// Watch for changes in the month to fetch all group data for that month
+watch(() => expenseData.value.month, (newMonth) => {
+  if (newMonth) {
+    fetchMonthGroups(newMonth);
+  }
+});
 </script>
 
 <template>
@@ -158,6 +212,10 @@ function viewExpenses() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div v-if="expenseData.group" style="margin-top: 8px;">
+        <BudgetMeter :budgeted="budgeted" :spent="spent" />
       </div>
       
       <div class="form-group">
