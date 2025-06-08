@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
 import BudgetMeter from './BudgetMeter.vue'
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const expenseData = ref({
   amount: 0,
@@ -182,6 +185,10 @@ function viewExpenses() {
     });
 }
 
+function goToMonthlyOverview() {
+  router.push('/monthly-overview');
+}
+
 // Watch for changes in the month to fetch all group data for that month
 watch(() => expenseData.value.month, (newMonth) => {
   if (newMonth) {
@@ -245,6 +252,9 @@ watch(() => expenseData.value.month, (newMonth) => {
         <button type="button" @click="viewExpenses()" class="action-btn">
           👁️ View All
         </button>
+        <button type="button" @click="goToMonthlyOverview()" class="action-btn">
+          📊 Monthly Overview
+        </button>
       </div>
     </div>
   </div>
@@ -274,6 +284,7 @@ watch(() => expenseData.value.month, (newMonth) => {
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  box-sizing: border-box;
 }
 
 .group-selector {

@@ -2,7 +2,6 @@
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
 import { watch } from 'vue'
-import CreateExpense from './components/CreateExpense.vue'
 import { useStore } from './store'
 
 const store = useStore()
@@ -35,7 +34,7 @@ function setNewPasskey() {
     <img src="./assets/logo.png" class="logo" alt="logo" />
   </div>
   <h1>Dime to Dozen</h1>
-  <CreateExpense />
+  <router-view />
   <p>
     <button @click="setNewPasskey">Set Passkey</button>
   </p>
