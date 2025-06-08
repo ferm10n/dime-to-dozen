@@ -100,15 +100,13 @@ Deno.serve({
       const body = await req.json();
       await ensurePasskey(body);
       
-      // Query to get distinct groups
-      const groups = await db
-        .select({ group: expenses.group })
-        .from(expenses)
-        .groupBy(expenses.group)
-        .orderBy(expenses.group);
+      const groupsResult = await db
+        .select({ group: groups.group })
+        .from(groups)
+        .orderBy(groups.group);
       
       // Extract just the group names for a cleaner response
-      return jsonResponse(groups.map(g => g.group));
+      return jsonResponse(groupsResult.map(g => g.group));
     }
 
     // New endpoint to get budgets for a specific month
