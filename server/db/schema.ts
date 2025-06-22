@@ -15,7 +15,7 @@ export const expenses = pgTable('expense', {
   note: text('note').default(''),
   amount: real('amount').notNull(),
   group: varchar('group', { length: 255 }).notNull().references(() => groups.group, {
-    onDelete: 'restrict',
+    onDelete: 'cascade',
     onUpdate: 'cascade',
   }),
   created_at: timestamp('created_at').defaultNow().notNull(),
@@ -28,7 +28,7 @@ export const expenses = pgTable('expense', {
 export const budgets = pgTable('budget', {
   id: serial('id').primaryKey(),
   group: varchar('group', { length: 255 }).notNull().references(() => groups.group, {
-    onDelete: 'restrict',
+    onDelete: 'cascade',
     onUpdate: 'cascade',
   }),
   amount: real('amount').notNull(),
