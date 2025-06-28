@@ -201,8 +201,26 @@ Deno.serve({
         return jsonResponse(results);
     }
 
-    return serveDir(req, {
-      fsRoot: "dist",
+    // Serve static assets from dist directory
+    // First try to serve the exact path for static assets
+    const fsRoot = "dist";
+    try {
+      // Check if the path is a file in our dist directory
+      const normalized = pathname === "/" ? "/index.html" : pathname;
+      const pathStat = await Deno.stat(`${fsRoot}${normalized}`);
+      
+      // If it's a file, serve it directly
+      if (pathStat.isFile) {
+        return serveDir(req, { fsRoot });
+      }
+    } catch {
+      // File doesn't exist, continue to serve index.html
+    }
+
+    // For all other routes, serve index.html to support SPA client-side routing
+    // This ensures that navigating directly to a route like /monthly-overview still works
+    return new Response(await Deno.readFile(`${fsRoot}/index.html`), {
+      headers: { "Content-Type": "text/html" },
     });
   } catch (error) {
     if (error instanceof Response) {
