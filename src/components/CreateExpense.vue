@@ -2,6 +2,8 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import BudgetMeter from './BudgetMeter.vue'
 import { useRouter } from 'vue-router';
+import { useStore } from '../store'
+import { apiRequest } from '../api-request';
 
 const router = useRouter();
 
@@ -19,7 +21,6 @@ const isLoading = ref(false);
 
 const monthGroups = ref<{group: string, spent: number, budgeted: number}[]>([]);
 
-import { useStore } from '../store'
 const store = useStore()
 
 // Generate the current month in YYYY-MM format
@@ -47,25 +48,19 @@ onMounted(() => {
 
 function fetchGroups() {
   isLoading.value = true;
-  fetch('/api/get-groups', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      passkey: store.passkey,
-    }),
+  apiRequest('/api/get-groups', {
+    passkey: store.passkey,
   })
-    .then((response) => response.json())
     .then((data) => {
       groups.value = data;
-      isLoading.value = false;
       
       // After fetching groups, also fetch the monthly data for the current month
       fetchMonthGroups(expenseData.value.month);
     })
     .catch((error) => {
       console.error('Error fetching groups:', error);
+    })
+    .finally(() => {
       isLoading.value = false;
     });
 }
@@ -75,39 +70,28 @@ function fetchMonthGroups(month: string) {
   if (!month) return;
   
   isLoading.value = true;
-  fetch('/api/get-month-groups', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      month,
-      passkey: store.passkey,
-    }),
+  apiRequest('/api/get-month-groups', {
+    passkey: store.passkey,
+    month,
   })
-    .then(res => res.json())
     .then(data => {
       monthGroups.value = Array.isArray(data) ? data : [];
-      isLoading.value = false;
     })
     .catch((error) => {
       console.error('Error fetching month groups:', error);
       monthGroups.value = [];
+    })
+    .finally(() => {
       isLoading.value = false;
     });
 }
 
 function testExpense() {
-  fetch('/api/post-expense', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      ...expenseData.value,
-      created_by: store.createdBy,
-      passkey: store.passkey,
-    }),
+  apiRequest('/api/post-expense', {
+    ...expenseData.value,
+    created_by: store.createdBy,
+    passkey: store.passkey,
   })
-    .then((response) => response.json())
     .then((data) => {
       console.log('Expense posted:', data);
       expenseData.value = {
@@ -158,16 +142,9 @@ function addNewGroup() {
 }
 
 function viewExpenses() {
-  fetch('/api/get-expenses', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      passkey: store.passkey,
-    }),
+  apiRequest('/api/get-expenses', {
+    passkey: store.passkey,
   })
-    .then((response) => response.json())
     .then((data) => {
       console.log('Fetched expenses:', data);
       // Display expenses in a more readable format

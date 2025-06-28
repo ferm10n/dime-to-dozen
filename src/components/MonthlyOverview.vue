@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from '../store';
 import BudgetMeter from './BudgetMeter.vue';
+import { apiRequest } from '../api-request';
 
 const router = useRouter();
 const store = useStore();
@@ -36,24 +37,18 @@ function fetchMonthGroups(month: string) {
   if (!month) return;
   
   isLoading.value = true;
-  fetch('/api/get-month-groups', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      month,
-      passkey: store.passkey,
-    }),
-  })
-    .then(res => res.json())
-    .then(data => {
-      monthGroups.value = Array.isArray(data) ? data : [];
-      isLoading.value = false;
-    })
-    .catch((error) => {
-      console.error('Error fetching month groups:', error);
-      monthGroups.value = [];
-      isLoading.value = false;
-    });
+
+  apiRequest('/api/get-month-groups', {
+    passkey: store.passkey,
+    month,
+  }).then((data) => {
+    monthGroups.value = Array.isArray(data) ? data : [];
+  }).catch((error) => {
+    console.error('Error fetching month groups:', error);
+    monthGroups.value = [];
+  }).finally(() => {
+    isLoading.value = false;
+  });
 }
 
 function goBack() {
