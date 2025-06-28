@@ -5,6 +5,7 @@ import { getGroupsEndpoint } from "./get-groups.ts";
 import { getMonthGroupsEndpoint } from "./get-month-groups.ts";
 import { postExpenseEndpoint } from "./post-expense.ts";
 import { copyMonthBudgetEndpoint } from "./copy-month-budget.ts";
+import { editBudgetGroupEndpoint } from "./edit-budget-group.ts";
 import { ApiEndpointDef } from "./util.ts";
 
 export const router = {
@@ -14,6 +15,7 @@ export const router = {
   '/api/get-budget': getBudgetEndpoint, // not used?
   '/api/get-month-groups': getMonthGroupsEndpoint,
   '/api/copy-month-budget': copyMonthBudgetEndpoint,
+  '/api/edit-budget-group': editBudgetGroupEndpoint,
 } satisfies {
     [path: string]: ApiEndpointDef<any, any>;
 }

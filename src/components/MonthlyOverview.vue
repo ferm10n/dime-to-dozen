@@ -15,6 +15,9 @@ const selectedGroups = ref<string[]>([]);
 const copyMode = ref(false);
 const copyToMonth = ref('');
 const isCopying = ref(false);
+const editingGroup = ref<string | null>(null);
+const editingAmount = ref<number | null>(null);
+const isEditing = ref(false);
 
 // Generate the current month in YYYY-MM format
 const currentMonth = computed(() => {
@@ -105,6 +108,35 @@ async function onCopyBtnPress() {
   }
 }
 
+function startEditGroup(group: string, amount: number) {
+  editingGroup.value = group;
+  editingAmount.value = amount;
+}
+function cancelEditGroup() {
+  editingGroup.value = null;
+  editingAmount.value = null;
+}
+async function saveEditGroup(month: string, group: string) {
+  if (editingAmount.value == null || isNaN(editingAmount.value)) return;
+  isEditing.value = true;
+  try {
+    await apiRequest('/api/edit-budget-group', {
+      passkey: store.passkey,
+      month,
+      group,
+      amount: editingAmount.value,
+    });
+    // Update local data
+    const idx = monthGroups.value.findIndex(g => g.group === group);
+    if (idx !== -1) monthGroups.value[idx].budgeted = editingAmount.value;
+    cancelEditGroup();
+  } catch (e) {
+    alert('Failed to update budget: ' + ((e as Error).message || e));
+  } finally {
+    isEditing.value = false;
+  }
+}
+
 const allGroupsSelected = computed(() =>
   monthGroups.value.length > 0 && selectedGroups.value.length === monthGroups.value.length
 );
@@ -167,6 +199,21 @@ function selectAllOrNone() {
         >
           <div class="group-name">{{ group.group }}</div>
           <BudgetMeter :budgeted="group.budgeted" :spent="group.spent" />
+          <template v-if="editingGroup === group.group">
+            <input
+              type="number"
+              v-model.number="editingAmount"
+              min="0"
+              step="0.01"
+              style="width: 90px; margin-left: 10px;"
+              :disabled="isEditing"
+            />
+            <button @click.stop="saveEditGroup(selectedMonth, group.group)" :disabled="isEditing" class="edit-save-btn">Save</button>
+            <button @click.stop="cancelEditGroup" :disabled="isEditing" class="edit-cancel-btn">Cancel</button>
+          </template>
+          <template v-else>
+            <button @click.stop="startEditGroup(group.group, group.budgeted)" class="edit-btn">Edit</button>
+          </template>
         </div>
       </div>
     </div>
@@ -523,5 +570,136 @@ h3, h4 {
 .copy-cancel-btn:hover {
   background: #eee;
   color: #333;
+}
+
+.edit-group-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.edit-group-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.edit-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.edit-group-title {
+  font-size: 1.2em;
+  margin: 0;
+}
+
+.edit-group-close {
+  cursor: pointer;
+  color: #888;
+}
+
+.edit-group-close:hover {
+  color: #333;
+}
+
+.edit-group-body {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.edit-group-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.edit-group-footer button {
+  padding: 0.6em 1.2em;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.edit-group-save {
+  background: #43a047;
+  color: #fff;
+}
+
+.edit-group-save:hover {
+  background: #388e3c;
+}
+
+.edit-group-cancel {
+  background: #f44336;
+  color: #fff;
+}
+
+.edit-group-cancel:hover {
+  background: #e53935;
+}
+
+.edit-btn, .edit-save-btn, .edit-cancel-btn {
+  margin-left: 10px;
+  padding: 0.3em 0.9em;
+  font-size: 0.95em;
+  border-radius: 4px;
+  border: 1px solid #ffd600;
+  background: #fffde7;
+  color: #b28900;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.edit-btn:hover, .edit-save-btn:hover {
+  background: #ffe066;
+  color: #333;
+}
+.edit-cancel-btn {
+  border: 1px solid #ccc;
+  background: #fafafa;
+  color: #888;
+}
+.edit-cancel-btn:hover {
+  background: #eee;
+  color: #333;
+}
+.edit-save-btn:disabled, .edit-cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+@media (prefers-color-scheme: dark) {
+  .edit-btn, .edit-save-btn {
+    background: #3a3200;
+    color: #ffd600;
+    border-color: #ffd600;
+  }
+  .edit-btn:hover, .edit-save-btn:hover {
+    background: #5c4b00;
+    color: #fffde7;
+  }
+  .edit-cancel-btn {
+    background: #222;
+    color: #bbb;
+    border-color: #555;
+  }
+  .edit-cancel-btn:hover {
+    background: #333;
+    color: #ffd600;
+  }
 }
 </style>
