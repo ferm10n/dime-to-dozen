@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from '../store';
 import BudgetMeter from './BudgetMeter.vue';
+import BudgetGroup from './BudgetGroup.vue';
 import { apiRequest } from '../api-request';
 
 const router = useRouter();
@@ -16,7 +17,7 @@ const copyMode = ref(false);
 const copyToMonth = ref('');
 const isCopying = ref(false);
 const editingGroup = ref<string | null>(null);
-const editingAmount = ref<number | null>(null);
+const editingAmount = ref<number | undefined>(undefined);
 const isEditing = ref(false);
 
 // Generate the current month in YYYY-MM format
@@ -114,7 +115,7 @@ function startEditGroup(group: string, amount: number) {
 }
 function cancelEditGroup() {
   editingGroup.value = null;
-  editingAmount.value = null;
+  editingAmount.value = undefined;
 }
 async function saveEditGroup(month: string, group: string) {
   if (editingAmount.value == null || isNaN(editingAmount.value)) return;
@@ -187,34 +188,21 @@ function selectAllOrNone() {
         <div v-else class="group-list-header">
           <h4>Budget by Category</h4>
         </div>
-        <div 
-          v-for="group in monthGroups" 
-          :key="group.group" 
-          class="budget-group"
-          :class="{
-            'budget-group-selected': selectedGroups.includes(group.group) && copyMode,
-            'can-select': copyMode
-          }"
-          @click="toggleGroupSelection(group.group)"
-        >
-          <div class="group-name">{{ group.group }}</div>
-          <BudgetMeter :budgeted="group.budgeted" :spent="group.spent" />
-          <template v-if="editingGroup === group.group">
-            <input
-              type="number"
-              v-model.number="editingAmount"
-              min="0"
-              step="0.01"
-              style="width: 90px; margin-left: 10px;"
-              :disabled="isEditing"
-            />
-            <button @click.stop="saveEditGroup(selectedMonth, group.group)" :disabled="isEditing" class="edit-save-btn">Save</button>
-            <button @click.stop="cancelEditGroup" :disabled="isEditing" class="edit-cancel-btn">Cancel</button>
-          </template>
-          <template v-else>
-            <button @click.stop="startEditGroup(group.group, group.budgeted)" class="edit-btn">Edit</button>
-          </template>
-        </div>
+        <BudgetGroup
+          v-for="group in monthGroups"
+          :key="group.group"
+          :group="group"
+          :selected="selectedGroups.includes(group.group)"
+          :copyMode="copyMode"
+          :editing="editingGroup === group.group"
+          :editingAmount="editingGroup === group.group ? editingAmount : undefined"
+          :isEditing="isEditing"
+          @toggle-select="toggleGroupSelection"
+          @start-edit="startEditGroup"
+          @cancel-edit="cancelEditGroup"
+          @save-edit="saveEditGroup(selectedMonth, $event)"
+          @update:editingAmount="val => editingAmount = val"
+        />
       </div>
     </div>
     
