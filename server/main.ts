@@ -17,7 +17,7 @@ function jsonResponse (payload: unknown) {
 }
 
 Deno.serve({
-  port: parseInt(Deno.env.get("PORT") || "8000", 10),
+  port: parseInt(Deno.env.get("PORT") || "6960", 10),
 }, async (req) => {
   try {
     const pathname = new URL(req.url).pathname;
