@@ -3,8 +3,8 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from '../store';
 import BudgetMeter from './BudgetMeter.vue';
-import BudgetGroup from './BudgetGroup.vue';
 import EditBudgetModal from './EditBudgetModal.vue';
+import ViewExpensesModal from './ViewExpensesModal.vue';
 import { apiRequest } from '../api-request';
 
 const router = useRouter();
@@ -15,6 +15,7 @@ const isLoading = ref(false);
 const selectedMonth = ref('');
 const editingGroup = ref<string | null>(null);
 const editingAmount = ref<number | undefined>(undefined);
+const viewingGroup = ref<string | null>(null);
 
 // Generate the current month in YYYY-MM format
 const currentMonth = computed(() => {
@@ -80,6 +81,14 @@ function cancelEditGroup() {
   editingAmount.value = undefined;
 }
 
+function startViewExpenses(group: string) {
+  viewingGroup.value = group;
+}
+
+function cancelViewExpenses() {
+  viewingGroup.value = null;
+}
+
 function handleUpdateGroup(group: string, newAmount: number) {
   // Update local data
   const idx = monthGroups.value.findIndex(g => g.group === group);
@@ -133,14 +142,23 @@ function handleUpdateGroup(group: string, newAmount: number) {
           >
             <div class="group-header">
               <div class="group-name">{{ group.group }}</div>
-              <button 
-                class="edit-btn" 
-                @click="startEditGroup(group.group, group.budgeted)"
-              >
-                <span class="material-icons">edit</span>
-              </button>
+              <div class="group-actions">
+                <button 
+                  class="action-btn view-btn" 
+                  @click="startViewExpenses(group.group)"
+                  title="View Expenses"
+                >
+                  <span class="material-icons">receipt_long</span>
+                </button>
+                <button 
+                  class="edit-btn" 
+                  @click="startEditGroup(group.group, group.budgeted)"
+                >
+                  <span class="material-icons">edit</span>
+                </button>
+              </div>
             </div>
-            <BudgetMeter :budgeted="group.budgeted" :spent="group.spent" />
+            <BudgetMeter :budgeted="group.budgeted" :spent="group.spent" showAmount />
           </div>
         </div>
       </div>
@@ -154,6 +172,14 @@ function handleUpdateGroup(group: string, newAmount: number) {
       :isOpen="editingGroup !== null"
       @close="cancelEditGroup"
       @update="handleUpdateGroup"
+    />
+    
+    <!-- View Expenses Modal -->
+    <ViewExpensesModal
+      :group="viewingGroup"
+      :month="selectedMonth"
+      :isOpen="viewingGroup !== null"
+      @close="cancelViewExpenses"
     />
   </div>
 </template>
@@ -283,6 +309,21 @@ select.form-input option {
   background-color: rgba(255, 235, 59, 0.1);
 }
 
+.action-btn {
+  padding: 4px;
+  margin: 0;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
 .edit-btn {
   padding: 4px;
   margin: 0;
@@ -293,6 +334,24 @@ select.form-input option {
 
 .edit-btn:hover {
   background-color: rgba(255, 235, 59, 0.1);
+}
+
+.view-btn {
+  padding: 4px;
+  margin: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  box-shadow: none;
+}
+
+.view-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--accent-color);
+}
+
+.group-actions {
+  display: flex;
+  gap: 4px;
 }
 
 @media (prefers-color-scheme: dark) {

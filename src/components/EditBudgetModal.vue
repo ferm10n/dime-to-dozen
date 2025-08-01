@@ -51,15 +51,15 @@ async function saveEdit() {
 </script>
 
 <template>
-  <div class="edit-group-modal" v-if="isOpen">
-    <div class="edit-group-content card elevation-4">
-      <div class="edit-group-header">
-        <h3 class="edit-group-title">Edit Budget: {{ group }}</h3>
-        <button class="edit-group-close" @click="cancelEdit">
+  <div class="edit-group-modal modal" v-if="isOpen">
+    <div class="edit-group-content modal-content card elevation-4">
+      <div class="edit-group-header modal-header">
+        <h3 class="edit-group-title modal-title">Edit Budget: {{ group }}</h3>
+        <button class="edit-group-close modal-close" @click="cancelEdit">
           <span class="material-icons">close</span>
         </button>
       </div>
-      <div class="edit-group-body">
+      <div class="edit-group-body modal-body">
         <div class="form-group">
           <label for="editBudgetAmount">Budget Amount:</label>
           <input 
@@ -72,7 +72,7 @@ async function saveEdit() {
           />
         </div>
       </div>
-      <div class="edit-group-footer">
+      <div class="edit-group-footer modal-footer">
         <button 
           class="edit-group-save edit-group-btn"
           @click="saveEdit"
@@ -93,62 +93,27 @@ async function saveEdit() {
 </template>
 
 <style scoped>
-.edit-group-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+.edit-group-btn {
+  flex: 1;
+}
+
+.edit-group-save {
   display: flex;
   align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 16px;
+  gap: 8px;
 }
 
-.edit-group-content {
-  width: 100%;
-  max-width: 500px;
-  background-color: var(--surface);
-  border-radius: 8px;
-  overflow: hidden;
-  padding: 0;
-}
-
-.edit-group-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  background-color: var(--accent-color);
-  color: var(--text-on-primary);
-}
-
-.edit-group-title {
-  margin: 0;
-  font-size: 1.2rem;
-}
-
-.edit-group-close {
-  background: transparent;
-  border: none;
-  color: var(--text-on-primary);
-  cursor: pointer;
-  padding: 8px;
+.edit-group-cancel {
   display: flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 50%;
+  gap: 8px;
+  background-color: transparent;
+  color: var(--text-primary);
   box-shadow: none;
 }
 
-.edit-group-close:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-}
-
-.edit-group-body {
-  padding: 16px;
+.edit-group-cancel:hover {
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .form-group {
@@ -176,35 +141,5 @@ async function saveEdit() {
 .form-input:focus {
   border-color: var(--accent-color);
   outline: none;
-}
-
-.edit-group-footer {
-  padding: 16px;
-  display: flex;
-  /* justify-content: flex-end; */
-  gap: 8px;
-}
-
-.edit-group-btn {
-    flex: 1;
-}
-
-.edit-group-save {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.edit-group-cancel {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background-color: transparent;
-  color: var(--text-primary);
-  box-shadow: none;
-}
-
-.edit-group-cancel:hover {
-  background-color: rgba(255, 255, 255, 0.05);
 }
 </style>

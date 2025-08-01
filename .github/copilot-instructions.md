@@ -1,4 +1,4 @@
 - use material design for the UI style
 - the UI must be mobile-friendly (mobile-first design)
-- use yellows for accent colors
 - use a dark theme, no light theme
+- keep things DRY (styles, logic, hardcoded values)
