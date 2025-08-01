@@ -128,7 +128,7 @@ const amountRemaining = computed(() => {
   display: flex;
   width: 100%;
   height: 24px;
-  background: rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.75);
   border-radius: 4px;
   overflow: hidden;
   position: relative;
@@ -160,15 +160,5 @@ const amountRemaining = computed(() => {
   line-height: 24px;
   top: 0;
   font-size: 0.9rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  .bar-outer {
-    background: rgba(255, 255, 255, 0.1);
-  }
-  
-  .bar-text {
-    color: rgba(0, 0, 0, 0.87);
-  }
 }
 </style>
