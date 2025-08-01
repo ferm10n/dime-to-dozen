@@ -4,6 +4,7 @@ import { computed, ref, watch, onMounted } from 'vue'
 interface Props {
   budgeted: number
   spent: number
+  showAmount?: boolean
 }
 
 const props = defineProps<Props>()
@@ -51,16 +52,37 @@ const fillRatio = computed(() => {
 })
 
 const overBudget = computed(() => props.spent > props.budgeted)
+
+const barColor = computed(() => {
+  if (overBudget.value) return '#e74c3c'; // Red
+  return '#4caf50'; // Green - good
+})
+
+const percentUsed = computed(() => {
+  if (props.budgeted <= 0) return 0;
+  return Math.round((props.spent / props.budgeted) * 100);
+})
+
+const amountRemaining = computed(() => {
+  return Math.max(0, props.budgeted - props.spent);
+})
 </script>
 
 <template>
   <div class="budget-meter">
+    <div class="meter-info" v-if="props.showAmount">
+      <div class="meter-value">{{ percentUsed }}% used</div>
+      <div class="meter-remaining" :class="{ 'over-budget': overBudget }">
+        {{ overBudget ? 'Over budget by' : 'Remaining' }}: ${{ overBudget ? (props.spent - props.budgeted).toFixed(2) : amountRemaining.toFixed(2) }}
+      </div>
+    </div>
+    
     <div class="bar-outer">
       <div
         class="bar-inner"
         :style="{
           width: (fillRatio * 100) + '%',
-          background: overBudget ? '#e74c3c' : '#4caf50'
+          background: barColor
         }"
       />
 
@@ -71,7 +93,7 @@ const overBudget = computed(() => props.spent > props.budgeted)
       />
 
       <span class="bar-text">
-        $ {{ animatedSpent.toFixed(2) }} / {{ animatedBudgeted.toFixed(2) }}
+        ${{ animatedSpent.toFixed(2) }} / ${{ animatedBudgeted.toFixed(2) }}
       </span>
     </div>
   </div>
@@ -80,41 +102,73 @@ const overBudget = computed(() => props.spent > props.budgeted)
 <style scoped>
 .budget-meter {
   width: 100%;
-  margin: 10px 0;
+  /* margin: 10px 0; */
 }
+
+.meter-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.meter-value {
+  font-weight: 500;
+}
+
+.meter-remaining {
+  color: #4CAF50;
+}
+
+.meter-remaining.over-budget {
+  color: #F44336;
+}
+
 .bar-outer {
   display: flex;
   width: 100%;
-  height: 32px;
-  background: #eee;
-  border-radius: 6px;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 4px;
   overflow: hidden;
   position: relative;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
 }
+
 .bar-inner {
   display: flex;
   align-items: center;
   height: 100%;
-  transition: width 0.3s;
-  color: #fff;
-  font-size: 1em;
-  white-space: nowrap;
+  transition: width 0.3s ease-out, background-color 0.3s;
   z-index: 1;
 }
+
 .bar-inner-empty {
   height: 100%;
   background: transparent;
 }
+
 .bar-text {
-  font-weight: bold;
+  font-weight: 500;
   position: absolute;
   left: 0;
   right: 0;
   text-align: center;
-  color: #000;
+  color: rgba(0, 0, 0, 0.87);
   pointer-events: none;
   z-index: 2;
-  line-height: 32px; /* Match height of .bar-outer */
+  line-height: 24px;
   top: 0;
+  font-size: 0.9rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .bar-outer {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .bar-text {
+    color: rgba(0, 0, 0, 0.87);
+  }
 }
 </style>

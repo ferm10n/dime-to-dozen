@@ -175,62 +175,96 @@ watch(() => expenseData.value.month, (newMonth) => {
 </script>
 
 <template>
-  <div class="card">
-    <div class="expense-form">
-      <h3>Create New Expense</h3>
+  <div class="expense-container">
+    <h2 class="page-title">Create Expense</h2>
+    
+    <div class="card expense-form">
+      <div class="form-group">
+        <label for="amount">Amount</label>
+        <input 
+          type="number" 
+          id="amount" 
+          v-model="expenseData.amount" 
+          placeholder="0.00"
+          min="0"
+          step="0.01"
+          class="form-input"
+        >
+      </div>
       
       <div class="form-group">
-        <label for="group">Group:</label>
+        <label for="note">Note</label>
+        <input 
+          type="text" 
+          id="note" 
+          v-model="expenseData.note" 
+          placeholder="What was this expense for?"
+          class="form-input"
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="month">Month</label>
+        <input 
+          type="month" 
+          id="month" 
+          v-model="expenseData.month"
+          class="form-input"
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="group">Budget Group</label>
         <div class="group-selector">
-          <select v-if="!isAddingNewGroup" id="group" v-model="expenseData.group" :disabled="isLoading">
-            <option value="" disabled>Select a group</option>
+          <select 
+            id="group" 
+            v-model="expenseData.group"
+            class="form-input"
+            v-if="!isAddingNewGroup"
+          >
+            <option value="">Select a budget group</option>
             <option v-for="group in groups" :key="group" :value="group">{{ group }}</option>
           </select>
-          <button v-if="!isAddingNewGroup" type="button" class="emoji-btn" @click="showAddGroupForm" title="Add New Group">➕</button>
+          <button 
+            class="add-group-btn" 
+            v-if="!isAddingNewGroup" 
+            @click="showAddGroupForm"
+          >
+            <span class="material-icons">add</span>
+          </button>
           
-          <div v-if="isAddingNewGroup" class="new-group-form">
-            <div class="group-selector">
-              <input id="newGroup" v-model="newGroupName" type="text" placeholder="Enter new group name" />
-              <button type="button" class="emoji-btn" @click="addNewGroup" title="Save">✅</button>
-              <button type="button" class="emoji-btn" @click="cancelAddGroup" title="Cancel">❌</button>
+          <div class="new-group-form" v-if="isAddingNewGroup">
+            <input 
+              type="text" 
+              v-model="newGroupName" 
+              placeholder="New group name"
+              class="form-input"
+            >
+            <div class="form-actions">
+              <button @click="addNewGroup" :disabled="newGroupName.trim().length < 3" class="action-btn">
+                <span class="material-icons">check</span>
+                <span>Save</span>
+              </button>
+              <button class="cancel-btn action-btn" @click="cancelAddGroup">
+                <span class="material-icons">close</span>
+                <span>Cancel</span>
+              </button>
             </div>
           </div>
         </div>
       </div>
-
-      <div v-if="expenseData.group" style="margin-top: 8px;">
+      
+      <div class="budget-info" v-if="expenseData.group">
         <BudgetMeter :budgeted="budgeted" :spent="spent" />
       </div>
       
-      <div class="form-group">
-        <label for="amount">Amount:</label>
-        <input id="amount" v-model.number="expenseData.amount" type="number" step="0.01" />
-      </div>
-      
-      <div class="form-group">
-        <label for="note">Note:</label>
-        <input id="note" v-model="expenseData.note" type="text" />
-      </div>
-      
-      <div class="form-group">
-        <label for="month">Month:</label>
-        <input id="month" v-model="expenseData.month" type="month" />
-      </div>
-      
-      <div class="form-group">
-        <label for="created_by">Created By:</label>
-        <input id="created_by" v-model="store.createdBy" type="text" />
-      </div>
-      
       <div class="form-actions">
-        <button type="button" @click="testExpense()" :disabled="!expenseData.group || expenseData.amount <= 0" class="action-btn">
-          📝 Post Expense
-        </button>
-        <button type="button" @click="viewExpenses()" class="action-btn">
-          👁️ View All
-        </button>
-        <button type="button" @click="goToMonthlyOverview()" class="action-btn">
-          📊 Monthly Overview
+        <button 
+          @click="testExpense" 
+          :disabled="!expenseData.group || !expenseData.amount || isLoading"
+          class="primary-btn full-width-btn"
+        >
+          <span class="material-icons">save</span> Save Expense
         </button>
       </div>
     </div>
@@ -238,30 +272,49 @@ watch(() => expenseData.value.month, (newMonth) => {
 </template>
 
 <style scoped>
+.expense-container {
+  width: 100%;
+}
+
+.page-title {
+  text-align: left;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
 .expense-form {
-  margin: 20px 0;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  margin: 0;
+  padding: 16px;
 }
 
 .form-group {
-  margin-bottom: 10px;
+  margin-bottom: 16px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  width: 100%;
 }
 
 .form-group label {
-  margin-bottom: 5px;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--text-primary);
 }
 
-.form-group input, .form-group select {
+.form-input {
   width: 100%;
-  padding: 5px;
-  border: 1px solid #ccc;
+  padding: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 4px;
   box-sizing: border-box;
+  font-size: 16px;
+  background-color: transparent;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus {
+  border-color: var(--accent-color);
+  outline: none;
 }
 
 .group-selector {
@@ -276,45 +329,82 @@ watch(() => expenseData.value.month, (newMonth) => {
   flex: 1;
 }
 
+/* Dropdown styling for dark theme */
+select.form-input {
+  color: var(--text-primary);
+}
+
+select.form-input option {
+  background-color: #333;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.add-group-btn {
+  padding: 12px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .new-group-form {
   width: 100%;
 }
 
 .form-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
-  margin-top: 10px;
+  margin-top: 16px;
+  width: 100%;
 }
 
-.emoji-btn {
-  white-space: nowrap;
-  padding: 5px 10px;
-  font-size: 1em;
-  height: fit-content;
-  background: #f0f0f0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-  margin: 0;
+.cancel-btn {
+  background-color: transparent;
+  color: var(--text-primary);
+  box-shadow: none;
 }
 
-.emoji-btn:hover {
-  background: #e0e0e0;
+.cancel-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.primary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.full-width-btn {
+  width: 100%;
+}
+
+.budget-info {
+  margin-top: 16px;
+  width: 100%;
 }
 
 .action-btn {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
+  justify-content: center;
+  gap: 4px;
 }
 
-button {
-  margin-right: 10px;
+.action-btn span {
+  display: flex;
+  align-items: center;
 }
 
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+@media (prefers-color-scheme: dark) {
+  .form-input {
+    border-color: rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
+  }
+  
+  .cancel-btn:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
 }
 </style>

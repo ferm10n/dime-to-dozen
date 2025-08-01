@@ -1,5 +1,4 @@
-only add comments when the code is not obvious
-
-use material design for the UI style
-
-use yellows for accent colors
+- use material design for the UI style
+- the UI must be mobile-friendly (mobile-first design)
+- use yellows for accent colors
+- use a dark theme, no light theme

@@ -155,409 +155,341 @@ function selectAllOrNone() {
 
 <template>
   <div class="monthly-overview">
-    <button @click="goBack" style="margin-bottom: 15px;">← Back to Expenses</button>
+    <h2 class="page-title">Monthly Overview</h2>
     
-    <div v-if="isLoading" class="loading">
-      Loading budget data...
-    </div>
-    
-    <div v-else class="budget-summary">
-      <div class="summary-header">
-        <h3>Monthly Summary for</h3>
-        <div class="month-selector">
-          <input id="month" v-model="selectedMonth" type="month" />
-        </div>
-      </div>
-      
-      <div class="total-budget">
-        <h4>Overall Budget</h4>
-        <BudgetMeter :budgeted="totalBudgeted" :spent="totalSpent" />
-      </div>
-      
-      
-      
-      <div v-if="monthGroups.length === 0" class="no-data">
-        No budget data available for this month.
-      </div>
-      
-      <div v-else class="group-list">
-        <div v-if="copyMode" class="group-list-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-          <h4>Budget by Category</h4>
-          <button class="select-all-btn" @click="selectAllOrNone">{{ selectAllOrNoneLabel }}</button>
-        </div>
-        <div v-else class="group-list-header">
-          <h4>Budget by Category</h4>
-        </div>
-        <BudgetGroup
-          v-for="group in monthGroups"
-          :key="group.group"
-          :group="group"
-          :selected="selectedGroups.includes(group.group)"
-          :copyMode="copyMode"
-          :editing="editingGroup === group.group"
-          :editingAmount="editingGroup === group.group ? editingAmount : undefined"
-          :isEditing="isEditing"
-          @toggle-select="toggleGroupSelection"
-          @start-edit="startEditGroup"
-          @cancel-edit="cancelEditGroup"
-          @save-edit="saveEditGroup(selectedMonth, $event)"
-          @update:editingAmount="val => editingAmount = val"
+    <div class="card">
+      <div class="month-selector">
+        <label for="monthSelector">Select Month:</label>
+        <input 
+          type="month" 
+          id="monthSelector" 
+          v-model="selectedMonth" 
+          class="form-input"
         />
       </div>
+      
+      <div v-if="isLoading" class="loading">
+        <p>Loading data...</p>
+      </div>
+      
+      <div v-else-if="monthGroups.length === 0" class="no-data">
+        <p>No budget data for this month</p>
+      </div>
+      
+      <div v-else>
+        <div class="budget-summary">
+          <div class="total-budget">
+            <BudgetMeter 
+              :budgeted="totalBudgeted" 
+              :spent="totalSpent" 
+              :showAmount="true" 
+            />
+          </div>
+        </div>
+        
+        <div v-if="copyMode" class="copy-mode-section">
+          <div class="copy-controls">
+            <div class="copy-controls-row">
+              <label for="copyToMonth">Copy to Month:</label>
+              <input 
+                type="month" 
+                id="copyToMonth" 
+                v-model="copyToMonth" 
+                class="form-input"
+              />
+            </div>
+            <div class="copy-controls-row">
+              <p>Selected Groups: {{ selectedGroups.length }}</p>
+            </div>
+            <div class="copy-controls-row buttons">
+              <button 
+                class="copy-action-btn" 
+                @click="onCopyBtnPress" 
+                :disabled="copyToMonth === '' || selectedGroups.length === 0 || isCopying"
+              >
+                <span class="material-icons">content_copy</span> Copy
+              </button>
+              <button class="copy-cancel-btn" @click="disableCopyMode">
+                <span class="material-icons">cancel</span> Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="group-list">
+          <div class="group-list-header">
+            <h3>Budget Groups</h3>
+            <div class="group-actions">
+              <button v-if="!copyMode" class="copy-enable-btn" @click="enableCopyMode">
+                <span class="material-icons">content_copy</span> Copy Groups
+              </button>
+              <button v-if="copyMode" class="secondary-btn" @click="selectAllOrNone">
+                {{ selectAllOrNoneLabel }}
+              </button>
+            </div>
+          </div>
+          
+          <div 
+            v-for="group in monthGroups" 
+            :key="group.group"
+            class="budget-group"
+            :class="{ 
+              'budget-group-selected': selectedGroups.includes(group.group),
+              'can-select': copyMode 
+            }"
+            @click="copyMode ? toggleGroupSelection(group.group) : null"
+          >
+            <div class="group-header">
+              <div class="group-name">{{ group.group }}</div>
+              <button 
+                v-if="!copyMode" 
+                class="edit-btn" 
+                @click="startEditGroup(group.group, group.budgeted)"
+              >
+                <span class="material-icons">edit</span>
+              </button>
+            </div>
+            <BudgetGroup 
+              :group="group.group" 
+              :spent="group.spent" 
+              :budgeted="group.budgeted" 
+            />
+          </div>
+        </div>
+      </div>
     </div>
     
-    <div class="copy-mode-section">
-      <template v-if="!copyMode">
-        <button class="copy-enable-btn" @click="enableCopyMode">Enable Copy Mode</button>
-      </template>
-      <template v-else>
-        <div class="copy-controls">
-          <div class="copy-controls-row">
-            <label for="copy-to-month">Copy selected groups to month:</label>
-            <input id="copy-to-month" v-model="copyToMonth" type="month" :min="selectedMonth" />
-          </div>
-          <div class="copy-controls-row buttons">
-            <button style="flex: 1" class="copy-action-btn" :disabled="!copyToMonth || selectedGroups.length === 0 || isCopying" @click="onCopyBtnPress">
-              {{ isCopying ? 'Copying...' : 'Copy Budgets' }}
-            </button>
-            <button style="flex: 1" class="copy-cancel-btn" @click="disableCopyMode">Cancel</button>
-          </div>
-          <div class="copy-controls-row buttons">
-            <button class="select-all-none-btn" @click="selectAllOrNone">
-              {{ selectAllOrNoneLabel }}
-            </button>
-          </div>    
+    <!-- Edit Group Modal -->
+    <div class="edit-group-modal" v-if="editingGroup">
+      <div class="edit-group-content card elevation-4">
+        <div class="edit-group-header">
+          <h3 class="edit-group-title">Edit Budget: {{ editingGroup }}</h3>
+          <button class="edit-group-close" @click="cancelEditGroup">
+            <span class="material-icons">close</span>
+          </button>
         </div>
-      </template>
+        <div class="edit-group-body">
+          <div class="form-group">
+            <label for="editBudgetAmount">Budget Amount:</label>
+            <input 
+              type="number" 
+              id="editBudgetAmount" 
+              v-model="editingAmount" 
+              class="form-input" 
+              min="0" 
+              step="0.01"
+            />
+          </div>
+        </div>
+        <div class="edit-group-footer">
+          <button 
+            class="edit-group-save"
+            @click="saveEditGroup(selectedMonth, editingGroup)"
+            :disabled="editingAmount === undefined || isNaN(editingAmount) || isEditing"
+          >
+            <span class="material-icons">save</span> Save
+          </button>
+          <button 
+            class="edit-group-cancel"
+            @click="cancelEditGroup"
+            :disabled="isEditing"
+          >
+            <span class="material-icons">cancel</span> Cancel
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
 .monthly-overview {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+  width: 100%;
 }
 
-.back-btn {
-  margin-bottom: 15px;
-  padding: 5px 10px;
-  background: #f0f0f0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-  color: #333;
-}
-
-.back-btn:hover {
-  background: #e0e0e0;
-}
-
-@media (prefers-color-scheme: dark) {
-  .back-btn {
-    background: #2c2c2c;
-    border-color: #444;
-    color: #e0e0e0;
-  }
-  
-  .back-btn:hover {
-    background: #3a3a3a;
-  }
+.page-title {
+  text-align: left;
+  margin-bottom: 16px;
+  color: var(--text-primary);
 }
 
 .month-selector {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  justify-content: center;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 16px;
 }
 
-.month-selector input {
-  padding: 5px;
-  border: 1px solid #ccc;
+.month-selector label {
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 16px;
+  background-color: transparent;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus {
+  border-color: var(--accent-color);
+  outline: none;
+}
+
+select.form-input {
+  color: var(--text-primary);
+}
+
+select.form-input option {
+  background-color: #333;
+  color: rgba(255, 255, 255, 0.87);
 }
 
 .budget-summary {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 15px;
-  background-color: #fff;
-}
-
-@media (prefers-color-scheme: dark) {
-  .month-selector input {
-    background-color: #2c2c2c;
-    border-color: #444;
-    color: #e0e0e0;
-  }
-
-  .budget-summary {
-    border-color: #444;
-    background-color: #1e1e1e;
-  }
-}
-
-.summary-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.summary-header h3 {
-  margin: 0;
+  margin-bottom: 16px;
 }
 
 .total-budget {
-  margin-bottom: 20px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #eee;
-}
-
-.selected-groups-summary {
-  margin-bottom: 20px;
-  padding: 15px;
-  border-radius: 8px;
-  background-color: #fffde7;
-  border: 1px solid #ffd600;
-}
-
-@media (prefers-color-scheme: dark) {
-  .total-budget {
-    border-bottom-color: #333;
-  }
-  
-  .selected-groups-summary {
-    background-color: #fff9c4;
-    border-color: #ffd600;
-  }
+  margin: 8px 0;
 }
 
 .group-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  margin-top: 16px;
 }
 
-.category-header {
+.group-list-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.selection-info {
+.group-list-header h3 {
+  margin: 0;
+}
+
+.group-actions {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.9em;
-  color: #666;
-}
-
-.clear-btn {
-  padding: 3px 8px;
-  font-size: 0.8em;
-  border-radius: 4px;
-  background-color: transparent;
-  border: 1px solid #ccc;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.clear-btn:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-  border-color: #999;
-}
-
-@media (prefers-color-scheme: dark) {
-  .selection-info {
-    color: #aaa;
-  }
-  
-  .clear-btn {
-    border-color: #555;
-    color: #e0e0e0;
-  }
-  
-  .clear-btn:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-color: #777;
-  }
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .budget-group {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 10px;
-  border-radius: 4px;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.budget-group:hover {
-  background-color: rgba(0, 0, 0, 0.04);
+  margin-bottom: 32px;
+  transition: background-color 0.2s;
 }
 
 .budget-group-selected {
-  background-color: rgba(255, 214, 0, 0.18); /* yellow accent */
-  box-shadow: 0 1px 3px rgba(255, 214, 0, 0.12), 0 1px 2px rgba(255, 214, 0, 0.18);
-  transform: translateY(-2px);
+  background-color: rgba(255, 235, 59, 0.1);
+  border: 1px solid var(--accent-color);
+  border-radius: 4px;
+  padding: 8px;
 }
 
 .can-select {
-  outline: 2px dashed #ffd600;
-  outline-offset: 2px;
-  box-shadow: 0 0 0 2px rgba(255, 214, 0, 0.12);
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  padding: 8px;
 }
 
-@media (prefers-color-scheme: dark) {
-  .can-select {
-    outline-color: #fff59d;
-    box-shadow: 0 0 0 2px rgba(255, 214, 0, 0.18);
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .budget-group:hover {
-    background-color: rgba(255, 255, 255, 0.3);
-  }
-  
-  .budget-group-selected {
-    background-color: rgba(255, 214, 0, 0.2);
-    box-shadow: 0 1px 3px rgba(255, 214, 0, 0.22), 0 1px 2px rgba(255, 214, 0, 0.28);
-  }
-  
-  .can-select {
-    outline-color: #fff59d;
-    box-shadow: 0 0 0 2px rgba(255, 214, 0, 0.35);
-  }
-}
-
-.group-name {
-  font-weight: bold;
-  width: 120px;
-  flex-shrink: 0;
-}
-
-.loading, .no-data {
-  text-align: center;
-  padding: 20px;
-  color: #666;
-}
-
-h3, h4 {
-  margin-top: 0;
-  margin-bottom: 15px;
-}
-
-.copy-mode-section {
-  margin-top: 40px;
+.group-header {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
 }
 
-.copy-enable-btn {
-  background: #43a047;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 0.7em 1.5em;
-  font-size: 1.1em;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(67, 160, 71, 0.08);
-  transition: background 0.2s;
+.group-name {
+  font-weight: 500;
+  font-size: 1.1rem;
+  text-align: left;
 }
 
-.copy-enable-btn:hover {
-  background: #388e3c;
+.loading, .no-data {
+  padding: 32px;
+  text-align: center;
+}
+
+.copy-mode-section {
+  margin: 16px 0;
+  padding: 16px;
 }
 
 .copy-controls {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  margin-top: 10px;
-}
-.copy-controls-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-}
-.copy-controls-row label {
-  min-width: 200px;
-  text-align: right;
-  margin-right: 8px;
-}
-.copy-controls-row input[type="month"] {
-  flex: 1;
-  min-width: 160px;
-  max-width: 220px;
-}
-.copy-controls-row.buttons {
-  justify-content: flex-start;
-  gap: 12px;
-}
-.copy-controls-row.buttons button {
-  flex: 1;
-}
-.group-list-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
   gap: 16px;
 }
-.copy-controls .copy-action-btn,
-.copy-controls .copy-cancel-btn {
-  width: auto;
-  margin: 0;
+
+.copy-controls-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.copy-controls-row label {
+  font-weight: 500;
+}
+
+.copy-controls-row.buttons {
+  flex-direction: row;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.copy-enable-btn,
+.secondary-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: transparent;
+  color: var(--accent-color);
+  box-shadow: none;
+  border: 1px solid var(--accent-color);
+}
+
+.copy-enable-btn:hover,
+.secondary-btn:hover {
+  background-color: rgba(255, 235, 59, 0.1);
 }
 
 .copy-action-btn {
-  background: #ffd600;
-  color: #333;
-  border: none;
-  border-radius: 6px;
-  padding: 0.7em 1.5em;
-  font-size: 1.1em;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(255, 214, 0, 0.12);
-  transition: background 0.2s;
-}
-
-.copy-action-btn:disabled {
-  background: #fff9c4;
-  color: #aaa;
-  cursor: not-allowed;
-}
-
-.copy-action-btn:hover:enabled {
-  background: #ffe066;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .copy-cancel-btn {
-  background: transparent;
-  color: #888;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 0.7em 1.2em;
-  font-size: 1em;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: transparent;
+  color: var(--text-primary);
+  box-shadow: none;
 }
 
 .copy-cancel-btn:hover {
-  background: #eee;
-  color: #333;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.edit-btn {
+  padding: 4px;
+  margin: 0;
+  background: transparent;
+  color: var(--accent-color);
+  box-shadow: none;
+}
+
+.edit-btn:hover {
+  background-color: rgba(255, 235, 59, 0.1);
 }
 
 .edit-group-modal {
@@ -566,128 +498,100 @@ h3, h4 {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  padding: 16px;
 }
 
 .edit-group-content {
-  background: #fff;
-  padding: 20px;
+  width: 100%;
+  max-width: 500px;
+  background-color: var(--surface);
   border-radius: 8px;
-  width: 400px;
-  max-width: 90%;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
 }
 
 .edit-group-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  padding: 16px;
+  background-color: var(--accent-color);
+  color: var(--text-on-primary);
 }
 
 .edit-group-title {
-  font-size: 1.2em;
   margin: 0;
+  font-size: 1.2rem;
 }
 
 .edit-group-close {
+  background: transparent;
+  border: none;
+  color: var(--text-on-primary);
   cursor: pointer;
-  color: #888;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: none;
 }
 
 .edit-group-close:hover {
-  color: #333;
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .edit-group-body {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  padding: 16px;
 }
 
 .edit-group-footer {
+  padding: 16px;
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 15px;
-}
-
-.edit-group-footer button {
-  padding: 0.6em 1.2em;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.2s;
+  gap: 8px;
 }
 
 .edit-group-save {
-  background: #43a047;
-  color: #fff;
-}
-
-.edit-group-save:hover {
-  background: #388e3c;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .edit-group-cancel {
-  background: #f44336;
-  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: transparent;
+  color: var(--text-primary);
+  box-shadow: none;
 }
 
 .edit-group-cancel:hover {
-  background: #e53935;
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
-.edit-btn, .edit-save-btn, .edit-cancel-btn {
-  margin-left: 10px;
-  padding: 0.3em 0.9em;
-  font-size: 0.95em;
-  border-radius: 4px;
-  border: 1px solid #ffd600;
-  background: #fffde7;
-  color: #b28900;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-}
-.edit-btn:hover, .edit-save-btn:hover {
-  background: #ffe066;
-  color: #333;
-}
-.edit-cancel-btn {
-  border: 1px solid #ccc;
-  background: #fafafa;
-  color: #888;
-}
-.edit-cancel-btn:hover {
-  background: #eee;
-  color: #333;
-}
-.edit-save-btn:disabled, .edit-cancel-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
 @media (prefers-color-scheme: dark) {
-  .edit-btn, .edit-save-btn {
-    background: #3a3200;
-    color: #ffd600;
-    border-color: #ffd600;
+  .form-input {
+    border-color: rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
   }
-  .edit-btn:hover, .edit-save-btn:hover {
-    background: #5c4b00;
-    color: #fffde7;
+  
+  .can-select {
+    border-color: rgba(255, 255, 255, 0.12);
   }
-  .edit-cancel-btn {
-    background: #222;
-    color: #bbb;
-    border-color: #555;
+  
+  .budget-group-selected {
+    background-color: rgba(255, 235, 59, 0.2);
   }
-  .edit-cancel-btn:hover {
-    background: #333;
-    color: #ffd600;
+  
+  .copy-cancel-btn:hover,
+  .edit-group-cancel:hover {
+    background-color: rgba(255, 255, 255, 0.05);
   }
 }
 </style>
