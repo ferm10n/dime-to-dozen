@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
 import BudgetMeter from './BudgetMeter.vue'
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useStore } from '../store'
 import { apiRequest } from '../api-request';
 
 const router = useRouter();
+const route = useRoute();
 
 const expenseData = ref({
   amount: 0,
@@ -43,7 +44,20 @@ const spent = computed(() => {
 
 onMounted(() => {
   fetchGroups();
-  expenseData.value.month = currentMonth.value;
+  
+  // Set month and group from URL parameters if they exist
+  const monthParam = route.query.month as string;
+  const groupParam = route.query.group as string;
+  
+  if (monthParam && /^\d{4}-\d{2}$/.test(monthParam)) {
+    expenseData.value.month = monthParam;
+  } else {
+    expenseData.value.month = currentMonth.value;
+  }
+  
+  if (groupParam) {
+    expenseData.value.group = groupParam;
+  }
 });
 
 function fetchGroups() {
@@ -170,8 +184,31 @@ function goToMonthlyOverview() {
 watch(() => expenseData.value.month, (newMonth) => {
   if (newMonth) {
     fetchMonthGroups(newMonth);
+    updateUrlParams();
   }
 });
+
+// Watch for group changes to update URL params
+watch(() => expenseData.value.group, (newGroup) => {
+  if (newGroup) {
+    updateUrlParams();
+  }
+});
+
+// Function to update URL parameters without navigation
+function updateUrlParams() {
+  const query = { ...route.query };
+  
+  if (expenseData.value.month) {
+    query.month = expenseData.value.month;
+  }
+  
+  if (expenseData.value.group) {
+    query.group = expenseData.value.group;
+  }
+  
+  router.replace({ query });
+}
 </script>
 
 <template>

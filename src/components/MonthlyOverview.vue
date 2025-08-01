@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useStore } from '../store';
 import BudgetMeter from './BudgetMeter.vue';
 import EditBudgetModal from './EditBudgetModal.vue';
@@ -8,6 +8,7 @@ import ViewExpensesModal from './ViewExpensesModal.vue';
 import { apiRequest } from '../api-request';
 
 const router = useRouter();
+const route = useRoute();
 const store = useStore();
 
 const monthGroups = ref<{group: string, spent: number, budgeted: number}[]>([]);
@@ -33,7 +34,15 @@ const totalSpent = computed(() => {
 });
 
 onMounted(() => {
-  selectedMonth.value = currentMonth.value;
+  // Check for month parameter in URL
+  const monthParam = route.query.month as string;
+  
+  if (monthParam && /^\d{4}-\d{2}$/.test(monthParam)) {
+    selectedMonth.value = monthParam;
+  } else {
+    selectedMonth.value = currentMonth.value;
+  }
+  
   fetchMonthGroups(selectedMonth.value);
 });
 
@@ -68,8 +77,20 @@ function navigateToCopyGroups() {
 watch(() => selectedMonth.value, (newMonth) => {
   if (newMonth) {
     fetchMonthGroups(newMonth);
+    updateUrlParams();
   }
 });
+
+// Function to update URL parameters without navigation
+function updateUrlParams() {
+  const query = { ...route.query };
+  
+  if (selectedMonth.value) {
+    query.month = selectedMonth.value;
+  }
+  
+  router.replace({ query });
+}
 
 function startEditGroup(group: string, amount: number) {
   editingGroup.value = group;
@@ -93,6 +114,17 @@ function handleUpdateGroup(group: string, newAmount: number) {
   // Update local data
   const idx = monthGroups.value.findIndex(g => g.group === group);
   if (idx !== -1) monthGroups.value[idx].budgeted = newAmount;
+}
+
+function addExpenseForGroup(group: string) {
+  router.push({
+    path: '/',
+    query: {
+      ...route.query,
+      month: selectedMonth.value,
+      group: group
+    }
+  });
 }
 </script>
 
@@ -133,6 +165,15 @@ function handleUpdateGroup(group: string, newAmount: number) {
         <div class="group-list">
           <div class="group-list-header">
             <h3>Budget Groups</h3>
+            <div class="group-actions">
+              <button 
+                class="secondary-btn" 
+                @click="addExpenseForGroup('')"
+              >
+                <span class="material-icons">add</span>
+                <span>Add Expense</span>
+              </button>
+            </div>
           </div>
           
           <div 
@@ -149,6 +190,13 @@ function handleUpdateGroup(group: string, newAmount: number) {
                   title="View Expenses"
                 >
                   <span class="material-icons">receipt_long</span>
+                </button>
+                <button 
+                  class="action-btn add-expense-btn" 
+                  @click="addExpenseForGroup(group.group)"
+                  title="Add Expense"
+                >
+                  <span class="material-icons">add_circle</span>
                 </button>
                 <button 
                   class="edit-btn" 
@@ -349,9 +397,17 @@ select.form-input option {
   color: var(--accent-color);
 }
 
-.group-actions {
-  display: flex;
-  gap: 4px;
+.add-expense-btn {
+  padding: 4px;
+  margin: 0;
+  background: transparent;
+  color: var(--accent-color);
+  box-shadow: none;
+}
+
+.add-expense-btn:hover {
+  background-color: rgba(255, 235, 59, 0.1);
+  color: var(--accent-color);
 }
 
 @media (prefers-color-scheme: dark) {
