@@ -5,10 +5,12 @@ import { createPinia } from 'pinia'
 import { createRouter, createWebHistory } from 'vue-router'
 import CreateExpense from './components/CreateExpense.vue'
 import MonthlyOverview from './components/MonthlyOverview.vue'
+import CopyGroups from './components/CopyGroups.vue'
 
 const routes = [
   { path: '/', component: CreateExpense },
-  { path: '/monthly-overview', component: MonthlyOverview }
+  { path: '/monthly-overview', component: MonthlyOverview },
+  { path: '/copy-groups', component: CopyGroups }
 ]
 
 const router = createRouter({

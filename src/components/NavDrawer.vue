@@ -37,6 +37,12 @@ const isActive = (path: string) => {
         <span class="material-icons">bar_chart</span>
         <span>Monthly Overview</span>
       </div>
+      <div class="nav-item" 
+           @click="navigateTo('/copy-groups')" 
+           :class="{ 'active': isActive('/copy-groups') }">
+        <span class="material-icons">content_copy</span>
+        <span>Copy Groups</span>
+      </div>
       <div class="nav-item" @click="emit('passkey')">
         <span class="material-icons">vpn_key</span>
         <span>Set Passkey</span>

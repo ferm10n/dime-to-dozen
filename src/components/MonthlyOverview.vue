@@ -12,10 +12,6 @@ const store = useStore();
 const monthGroups = ref<{group: string, spent: number, budgeted: number}[]>([]);
 const isLoading = ref(false);
 const selectedMonth = ref('');
-const selectedGroups = ref<string[]>([]);
-const copyMode = ref(false);
-const copyToMonth = ref('');
-const isCopying = ref(false);
 const editingGroup = ref<string | null>(null);
 const editingAmount = ref<number | undefined>(undefined);
 const isEditing = ref(false);
@@ -63,6 +59,10 @@ function goBack() {
   router.push('/');
 }
 
+function navigateToCopyGroups() {
+  router.push('/copy-groups');
+}
+
 // Watch for changes in the selected month
 watch(() => selectedMonth.value, (newMonth) => {
   if (newMonth) {
@@ -70,53 +70,16 @@ watch(() => selectedMonth.value, (newMonth) => {
   }
 });
 
-function toggleGroupSelection(groupName: string) {
-  const index = selectedGroups.value.indexOf(groupName);
-  if (index === -1) {
-    // If not already selected, add to selections
-    selectedGroups.value.push(groupName);
-  } else {
-    // If already selected, remove from selections
-    selectedGroups.value.splice(index, 1);
-  }
-}
-
-function enableCopyMode() {
-  copyMode.value = true;
-  copyToMonth.value = '';
-}
-
-function disableCopyMode() {
-  copyMode.value = false;
-}
-
-async function onCopyBtnPress() {
-  if (!copyToMonth.value || selectedGroups.value.length === 0) return;
-  isCopying.value = true;
-  try {
-    const res = await apiRequest('/api/copy-month-budget', {
-      passkey: store.passkey,
-      fromMonth: selectedMonth.value,
-      toMonth: copyToMonth.value,
-      groups: selectedGroups.value,
-    });
-    alert(`Copied ${res.copied} group budget${res.copied === 1 ? '' : 's'} to ${copyToMonth.value}`);
-    disableCopyMode();
-  } catch (e) {
-    alert('Copy failed: ' + ((e as Error).message || e));
-  } finally {
-    isCopying.value = false;
-  }
-}
-
 function startEditGroup(group: string, amount: number) {
   editingGroup.value = group;
   editingAmount.value = amount;
 }
+
 function cancelEditGroup() {
   editingGroup.value = null;
   editingAmount.value = undefined;
 }
+
 async function saveEditGroup(month: string, group: string) {
   if (editingAmount.value == null || isNaN(editingAmount.value)) return;
   isEditing.value = true;
@@ -135,20 +98,6 @@ async function saveEditGroup(month: string, group: string) {
     alert('Failed to update budget: ' + ((e as Error).message || e));
   } finally {
     isEditing.value = false;
-  }
-}
-
-const allGroupsSelected = computed(() =>
-  monthGroups.value.length > 0 && selectedGroups.value.length === monthGroups.value.length
-);
-const selectAllOrNoneLabel = computed(() =>
-  allGroupsSelected.value ? 'Select None' : 'Select All'
-);
-function selectAllOrNone() {
-  if (allGroupsSelected.value) {
-    selectedGroups.value = [];
-  } else {
-    selectedGroups.value = monthGroups.value.map(g => g.group);
   }
 }
 </script>
@@ -187,44 +136,12 @@ function selectAllOrNone() {
           </div>
         </div>
         
-        <div v-if="copyMode" class="copy-mode-section">
-          <div class="copy-controls">
-            <div class="copy-controls-row">
-              <label for="copyToMonth">Copy to Month:</label>
-              <input 
-                type="month" 
-                id="copyToMonth" 
-                v-model="copyToMonth" 
-                class="form-input"
-              />
-            </div>
-            <div class="copy-controls-row">
-              <p>Selected Groups: {{ selectedGroups.length }}</p>
-            </div>
-            <div class="copy-controls-row buttons">
-              <button 
-                class="copy-action-btn" 
-                @click="onCopyBtnPress" 
-                :disabled="copyToMonth === '' || selectedGroups.length === 0 || isCopying"
-              >
-                <span class="material-icons">content_copy</span> Copy
-              </button>
-              <button class="copy-cancel-btn" @click="disableCopyMode">
-                <span class="material-icons">cancel</span> Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-        
         <div class="group-list">
           <div class="group-list-header">
             <h3>Budget Groups</h3>
             <div class="group-actions">
-              <button v-if="!copyMode" class="copy-enable-btn" @click="enableCopyMode">
+              <button class="copy-navigate-btn" @click="navigateToCopyGroups">
                 <span class="material-icons">content_copy</span> Copy Groups
-              </button>
-              <button v-if="copyMode" class="secondary-btn" @click="selectAllOrNone">
-                {{ selectAllOrNoneLabel }}
               </button>
             </div>
           </div>
@@ -233,27 +150,17 @@ function selectAllOrNone() {
             v-for="group in monthGroups" 
             :key="group.group"
             class="budget-group"
-            :class="{ 
-              'budget-group-selected': selectedGroups.includes(group.group),
-              'can-select': copyMode 
-            }"
-            @click="copyMode ? toggleGroupSelection(group.group) : null"
           >
             <div class="group-header">
               <div class="group-name">{{ group.group }}</div>
               <button 
-                v-if="!copyMode" 
                 class="edit-btn" 
                 @click="startEditGroup(group.group, group.budgeted)"
               >
                 <span class="material-icons">edit</span>
               </button>
             </div>
-            <BudgetGroup 
-              :group="group.group" 
-              :spent="group.spent" 
-              :budgeted="group.budgeted" 
-            />
+            <BudgetMeter :budgeted="group.budgeted" :spent="group.spent" />
           </div>
         </div>
       </div>
@@ -328,12 +235,13 @@ function selectAllOrNone() {
 .form-input {
   width: 100%;
   padding: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 4px;
   box-sizing: border-box;
   font-size: 16px;
   background-color: transparent;
   transition: border-color 0.2s;
+  color: var(--text-primary);
 }
 
 .form-input:focus {
@@ -382,22 +290,15 @@ select.form-input option {
 }
 
 .budget-group {
-  margin-bottom: 32px;
+  margin-bottom: 12px;
   transition: background-color 0.2s;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  padding: 12px;
 }
 
-.budget-group-selected {
-  background-color: rgba(255, 235, 59, 0.1);
-  border: 1px solid var(--accent-color);
-  border-radius: 4px;
-  padding: 8px;
-}
-
-.can-select {
-  cursor: pointer;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 4px;
-  padding: 8px;
+.budget-group:hover {
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .group-header {
@@ -417,35 +318,7 @@ select.form-input option {
   text-align: center;
 }
 
-.copy-mode-section {
-  margin: 16px 0;
-  padding: 16px;
-}
-
-.copy-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.copy-controls-row {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.copy-controls-row label {
-  font-weight: 500;
-}
-
-.copy-controls-row.buttons {
-  flex-direction: row;
-  justify-content: flex-end;
-  margin-top: 8px;
-}
-
-.copy-enable-btn,
+.copy-navigate-btn, 
 .secondary-btn {
   display: flex;
   align-items: center;
@@ -456,28 +329,9 @@ select.form-input option {
   border: 1px solid var(--accent-color);
 }
 
-.copy-enable-btn:hover,
+.copy-navigate-btn:hover,
 .secondary-btn:hover {
   background-color: rgba(255, 235, 59, 0.1);
-}
-
-.copy-action-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.copy-cancel-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background-color: transparent;
-  color: var(--text-primary);
-  box-shadow: none;
-}
-
-.copy-cancel-btn:hover {
-  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .edit-btn {
@@ -576,20 +430,10 @@ select.form-input option {
 }
 
 @media (prefers-color-scheme: dark) {
-  .form-input {
-    border-color: rgba(255, 255, 255, 0.12);
-    color: var(--text-primary);
-  }
-  
-  .can-select {
+  .budget-group {
     border-color: rgba(255, 255, 255, 0.12);
   }
   
-  .budget-group-selected {
-    background-color: rgba(255, 235, 59, 0.2);
-  }
-  
-  .copy-cancel-btn:hover,
   .edit-group-cancel:hover {
     background-color: rgba(255, 255, 255, 0.05);
   }
