@@ -308,7 +308,7 @@ select.form-input option {
 
 .group-actions {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   flex-wrap: wrap;
 }
 
