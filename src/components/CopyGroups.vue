@@ -76,10 +76,6 @@ async function onCopyBtnPress() {
   }
 }
 
-function goBack() {
-  router.push('/monthly-overview');
-}
-
 const allGroupsSelected = computed(() =>
   monthGroups.value.length > 0 && selectedGroups.value.length === monthGroups.value.length
 );
@@ -165,9 +161,6 @@ function selectAllOrNone() {
             :disabled="toMonth === '' || selectedGroups.length === 0 || isCopying"
           >
             <span class="material-icons">content_copy</span> Copy Selected Groups
-          </button>
-          <button class="secondary-btn" @click="goBack">
-            <span class="material-icons">arrow_back</span> Cancel
           </button>
         </div>
       </div>
