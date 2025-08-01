@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { useStore } from '../store';
 import BudgetMeter from './BudgetMeter.vue';
 import BudgetGroup from './BudgetGroup.vue';
+import EditBudgetModal from './EditBudgetModal.vue';
 import { apiRequest } from '../api-request';
 
 const router = useRouter();
@@ -14,7 +15,6 @@ const isLoading = ref(false);
 const selectedMonth = ref('');
 const editingGroup = ref<string | null>(null);
 const editingAmount = ref<number | undefined>(undefined);
-const isEditing = ref(false);
 
 // Generate the current month in YYYY-MM format
 const currentMonth = computed(() => {
@@ -80,25 +80,10 @@ function cancelEditGroup() {
   editingAmount.value = undefined;
 }
 
-async function saveEditGroup(month: string, group: string) {
-  if (editingAmount.value == null || isNaN(editingAmount.value)) return;
-  isEditing.value = true;
-  try {
-    await apiRequest('/api/edit-budget-group', {
-      passkey: store.passkey,
-      month,
-      group,
-      amount: editingAmount.value,
-    });
-    // Update local data
-    const idx = monthGroups.value.findIndex(g => g.group === group);
-    if (idx !== -1) monthGroups.value[idx].budgeted = editingAmount.value;
-    cancelEditGroup();
-  } catch (e) {
-    alert('Failed to update budget: ' + ((e as Error).message || e));
-  } finally {
-    isEditing.value = false;
-  }
+function handleUpdateGroup(group: string, newAmount: number) {
+  // Update local data
+  const idx = monthGroups.value.findIndex(g => g.group === group);
+  if (idx !== -1) monthGroups.value[idx].budgeted = newAmount;
 }
 </script>
 
@@ -126,7 +111,7 @@ async function saveEditGroup(month: string, group: string) {
       </div>
       
       <div v-else>
-        <div class="budget-summary">
+        <div class="budget-summary budget-group">
           <div class="total-budget">
             <BudgetMeter 
               :budgeted="totalBudgeted" 
@@ -139,11 +124,6 @@ async function saveEditGroup(month: string, group: string) {
         <div class="group-list">
           <div class="group-list-header">
             <h3>Budget Groups</h3>
-            <div class="group-actions">
-              <button class="copy-navigate-btn" @click="navigateToCopyGroups">
-                <span class="material-icons">content_copy</span> Copy Groups
-              </button>
-            </div>
           </div>
           
           <div 
@@ -167,45 +147,14 @@ async function saveEditGroup(month: string, group: string) {
     </div>
     
     <!-- Edit Group Modal -->
-    <div class="edit-group-modal" v-if="editingGroup">
-      <div class="edit-group-content card elevation-4">
-        <div class="edit-group-header">
-          <h3 class="edit-group-title">Edit Budget: {{ editingGroup }}</h3>
-          <button class="edit-group-close" @click="cancelEditGroup">
-            <span class="material-icons">close</span>
-          </button>
-        </div>
-        <div class="edit-group-body">
-          <div class="form-group">
-            <label for="editBudgetAmount">Budget Amount:</label>
-            <input 
-              type="number" 
-              id="editBudgetAmount" 
-              v-model="editingAmount" 
-              class="form-input" 
-              min="0" 
-              step="0.01"
-            />
-          </div>
-        </div>
-        <div class="edit-group-footer">
-          <button 
-            class="edit-group-save"
-            @click="saveEditGroup(selectedMonth, editingGroup)"
-            :disabled="editingAmount === undefined || isNaN(editingAmount) || isEditing"
-          >
-            <span class="material-icons">save</span> Save
-          </button>
-          <button 
-            class="edit-group-cancel"
-            @click="cancelEditGroup"
-            :disabled="isEditing"
-          >
-            <span class="material-icons">cancel</span> Cancel
-          </button>
-        </div>
-      </div>
-    </div>
+    <EditBudgetModal 
+      :group="editingGroup"
+      :amount="editingAmount"
+      :month="selectedMonth"
+      :isOpen="editingGroup !== null"
+      @close="cancelEditGroup"
+      @update="handleUpdateGroup"
+    />
   </div>
 </template>
 
@@ -346,96 +295,9 @@ select.form-input option {
   background-color: rgba(255, 235, 59, 0.1);
 }
 
-.edit-group-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 16px;
-}
-
-.edit-group-content {
-  width: 100%;
-  max-width: 500px;
-  background-color: var(--surface);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.edit-group-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  background-color: var(--accent-color);
-  color: var(--text-on-primary);
-}
-
-.edit-group-title {
-  margin: 0;
-  font-size: 1.2rem;
-}
-
-.edit-group-close {
-  background: transparent;
-  border: none;
-  color: var(--text-on-primary);
-  cursor: pointer;
-  padding: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  box-shadow: none;
-}
-
-.edit-group-close:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-}
-
-.edit-group-body {
-  padding: 16px;
-}
-
-.edit-group-footer {
-  padding: 16px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.edit-group-save {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.edit-group-cancel {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background-color: transparent;
-  color: var(--text-primary);
-  box-shadow: none;
-}
-
-.edit-group-cancel:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
 @media (prefers-color-scheme: dark) {
   .budget-group {
     border-color: rgba(255, 255, 255, 0.12);
-  }
-  
-  .edit-group-cancel:hover {
-    background-color: rgba(255, 255, 255, 0.05);
   }
 }
 </style>
