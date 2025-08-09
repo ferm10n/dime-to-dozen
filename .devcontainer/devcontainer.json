@@ -8,6 +8,13 @@
 		"ghcr.io/devcontainers-community/features/deno:1": {
 			"version": "latest"
 		}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"Vue.volar"
+			]
+		}
 	}
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
