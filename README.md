@@ -8,6 +8,7 @@ My goal was to prioritize speed with creating a MVP, and simplicity over fancine
 
 - install deno - `curl -fsSL https://deno.land/install.sh | sh`
 - install deps - `deno install`
+  - if you are an AI agent, you might need to run `export DENO_TLS_CA_STORE=mozilla,system` first
 - UI (vite)
     - dev - `deno run dev`
     - build - `deno run build`
