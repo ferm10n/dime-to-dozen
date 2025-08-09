@@ -11,24 +11,24 @@ import { deleteExpenseEndpoint } from "./delete-expense.ts";
 import { ApiEndpointDef } from "./util.ts";
 
 export const router = {
-  '/api/get-expenses': getExpensesEndpoint,
-  '/api/post-expense': postExpenseEndpoint,
-  '/api/edit-expense': editExpenseEndpoint,
-  '/api/delete-expense': deleteExpenseEndpoint,
-  '/api/get-groups': getGroupsEndpoint,
-  '/api/get-budget': getBudgetEndpoint, // not used?
-  '/api/get-month-groups': getMonthGroupsEndpoint,
-  '/api/copy-month-budget': copyMonthBudgetEndpoint,
-  '/api/edit-budget-group': editBudgetGroupEndpoint,
+  "/api/get-expenses": getExpensesEndpoint,
+  "/api/post-expense": postExpenseEndpoint,
+  "/api/edit-expense": editExpenseEndpoint,
+  "/api/delete-expense": deleteExpenseEndpoint,
+  "/api/get-groups": getGroupsEndpoint,
+  "/api/get-budget": getBudgetEndpoint, // not used?
+  "/api/get-month-groups": getMonthGroupsEndpoint,
+  "/api/copy-month-budget": copyMonthBudgetEndpoint,
+  "/api/edit-budget-group": editBudgetGroupEndpoint,
 } satisfies {
-    [path: string]: ApiEndpointDef<any, any>;
-}
+  [path: string]: ApiEndpointDef<any, any>;
+};
 
 export type ApiRouter = {
-[endpoint in keyof typeof router]: typeof router[endpoint] extends ApiEndpointDef<infer I, infer O>
-  ? {
-    input: z.infer<I>;
-    output: O;
-  }
-  : never;
-}
+  [endpoint in keyof typeof router]: typeof router[endpoint] extends
+    ApiEndpointDef<infer I, infer O> ? {
+      input: z.infer<I>;
+      output: O;
+    }
+    : never;
+};

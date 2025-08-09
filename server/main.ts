@@ -7,7 +7,7 @@ import { ApiEndpointDef, parseOrDie } from "./api/util.ts";
 // const secret = Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b => b.toString(16).padStart(2, "0")).join("");
 // console.log("Generated secret:", secret);
 
-function jsonResponse (payload: unknown) {
+function jsonResponse(payload: unknown) {
   return new Response(JSON.stringify(payload), {
     headers: {
       "Content-Type": "application/json",
@@ -22,14 +22,15 @@ Deno.serve({
   try {
     const pathname = new URL(req.url).pathname;
 
-    const apiEndpoint: ApiEndpointDef<any, unknown> = router[pathname as keyof typeof router];
+    const apiEndpoint: ApiEndpointDef<any, unknown> =
+      router[pathname as keyof typeof router];
     if (apiEndpoint && req.method === "POST") {
       let body: any = null;
       if (apiEndpoint.inputSchema) {
         body = parseOrDie(apiEndpoint.inputSchema, await req.json());
       }
       const responseData: unknown = await apiEndpoint.handler(body);
-      if (typeof responseData === 'string') {
+      if (typeof responseData === "string") {
         return new Response(responseData, {
           headers: { "Content-Type": "text/plain" },
         });
@@ -45,7 +46,7 @@ Deno.serve({
       // Check if the path is a file in our dist directory
       const normalized = pathname === "/" ? "/index.html" : pathname;
       const pathStat = await Deno.stat(`${fsRoot}${normalized}`);
-      
+
       // If it's a file, serve it directly
       if (pathStat.isFile) {
         return serveDir(req, { fsRoot });
