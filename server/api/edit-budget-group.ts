@@ -1,6 +1,6 @@
-import { db } from '../db/index.ts';
-import { budgets, budgetInsertSchema } from '../db/schema.ts';
-import { defineEndpoint, ensurePasskey, passkeySchema } from './util.ts';
+import { db } from "../db/index.ts";
+import { budgetInsertSchema, budgets } from "../db/schema.ts";
+import { defineEndpoint, ensurePasskey, passkeySchema } from "./util.ts";
 
 export const editBudgetGroupEndpoint = defineEndpoint({
   inputSchema: passkeySchema.extend({

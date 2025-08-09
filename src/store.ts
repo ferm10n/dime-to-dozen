@@ -1,11 +1,11 @@
-import { defineStore } from 'pinia';
-import { useLocalStorage } from '@vueuse/core';
+import { defineStore } from "pinia";
+import { useLocalStorage } from "@vueuse/core";
 import { computed } from "vue";
 
-export const useStore = defineStore('main', () => {
-  const localStorageData = useLocalStorage('data', {
-    passkey: '',
-    created_by: '',
+export const useStore = defineStore("main", () => {
+  const localStorageData = useLocalStorage("data", {
+    passkey: "",
+    created_by: "",
   });
 
   const passkey = computed({

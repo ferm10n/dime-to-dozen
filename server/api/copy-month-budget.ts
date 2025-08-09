@@ -1,8 +1,8 @@
-import { db } from '../db/index.ts';
-import { budgets, budgetInsertSchema } from '../db/schema.ts';
-import { defineEndpoint, ensurePasskey, passkeySchema } from './util.ts';
-import { eq, and, inArray } from 'drizzle-orm';
-import { z } from 'zod/v4';
+import { db } from "../db/index.ts";
+import { budgetInsertSchema, budgets } from "../db/schema.ts";
+import { defineEndpoint, ensurePasskey, passkeySchema } from "./util.ts";
+import { and, eq, inArray } from "drizzle-orm";
+import { z } from "zod/v4";
 
 export const copyMonthBudgetEndpoint = defineEndpoint({
   inputSchema: passkeySchema.extend({
@@ -23,9 +23,9 @@ export const copyMonthBudgetEndpoint = defineEndpoint({
       .select({ group: budgets.group })
       .from(budgets)
       .where(and(eq(budgets.month, toMonth), inArray(budgets.group, groups)));
-    const toGroups = new Set(toBudgets.map(b => b.group));
+    const toGroups = new Set(toBudgets.map((b) => b.group));
     // Filter out groups that already exist in toMonth
-    const toInsert = fromBudgets.filter(b => !toGroups.has(b.group));
+    const toInsert = fromBudgets.filter((b) => !toGroups.has(b.group));
     // Insert new budgets for toMonth
     for (const b of toInsert) {
       await db.insert(budgets).values({
