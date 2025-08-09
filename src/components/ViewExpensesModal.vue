@@ -67,6 +67,16 @@ async function fetchExpenses() {
   }
 }
 
+function onExpenseUpdated() {
+  // Refresh the expense list when an expense is updated
+  fetchExpenses();
+}
+
+function onExpenseDeleted() {
+  // Refresh the expense list when an expense is deleted
+  fetchExpenses();
+}
+
 function closeModal() {
   emit('close');
 }
@@ -117,6 +127,8 @@ watch(expenses, (newExpenses) => {
             :key="expense.id" 
             :expense="expense"
             :showGroup="!props.group"
+            @expense-updated="onExpenseUpdated"
+            @expense-deleted="onExpenseDeleted"
           />
         </div>
       </div>
