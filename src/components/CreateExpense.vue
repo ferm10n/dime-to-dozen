@@ -239,6 +239,18 @@ function updateUrlParams() {
           class="form-input"
         >
       </div>
+
+      <div class="form-group">
+        <label for="created_by">Created By</label>
+        <input
+          type="text"
+          id="created_by"
+          v-model="store.createdBy"
+          placeholder="Who spent this cash?"
+          class="form-input"
+          autocomplete="username"
+        >
+      </div>
       
       <div class="form-group">
         <label for="month">Month</label>
