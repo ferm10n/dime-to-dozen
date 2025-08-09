@@ -11,6 +11,7 @@ interface ExpenseProps {
 
 const props = defineProps<{
   expense: ExpenseProps;
+  showGroup?: boolean;
 }>();
 
 const formattedDate = new Date(props.expense.created_at).toLocaleDateString(undefined, {
@@ -28,6 +29,7 @@ const formattedDate = new Date(props.expense.created_at).toLocaleDateString(unde
         <div class="expense-date">{{ formattedDate }}</div>
       </div>
       <div class="expense-note" v-if="expense.note">{{ expense.note }}</div>
+      <div class="expense-group" v-if="showGroup">Group: {{ expense.group }}</div>
       <div class="expense-creator">Added by: {{ expense.created_by }}</div>
     </div>
   </div>
@@ -75,8 +77,9 @@ const formattedDate = new Date(props.expense.created_at).toLocaleDateString(unde
   white-space: pre-line;
 }
 
-.expense-creator {
-  font-size: 0.8rem;
+.expense-creator, .expense-group {
+  font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.6);
+  margin-top: 4px;
 }
 </style>

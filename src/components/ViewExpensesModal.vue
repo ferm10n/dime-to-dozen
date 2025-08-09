@@ -31,21 +31,19 @@ const error = ref<string | null>(null);
 
 // Fetch expenses when modal opens
 watch(() => props.isOpen, (isOpen) => {
-  if (isOpen && props.group) {
+  if (isOpen) {
     fetchExpenses();
   }
 });
 
 // Also fetch on mount if already open
 onMounted(() => {
-  if (props.isOpen && props.group) {
+  if (props.isOpen) {
     fetchExpenses();
   }
 });
 
 async function fetchExpenses() {
-  if (!props.group) return;
-  
   isLoading.value = true;
   error.value = null;
   
@@ -54,7 +52,7 @@ async function fetchExpenses() {
     expenses.value = await apiRequest('/api/get-expenses', {
       passkey: store.passkey,
       month: props.month,
-      group: props.group
+      ...(props.group ? { group: props.group } : {})  // Only include group param if not null
     });
     
     // Sort by date (newest first)
@@ -83,7 +81,7 @@ watch(expenses, (newExpenses) => {
   <div class="view-expenses-modal modal" v-if="isOpen">
     <div class="view-expenses-content modal-content card elevation-4">
       <div class="view-expenses-header modal-header">
-        <h3 class="view-expenses-title modal-title">Expenses: {{ group }}</h3>
+        <h3 class="view-expenses-title modal-title">Expenses: {{ group || 'All Groups' }}</h3>
         <button class="view-expenses-close modal-close" @click="closeModal">
           <span class="material-icons">close</span>
         </button>
@@ -117,7 +115,8 @@ watch(expenses, (newExpenses) => {
           <ExpenseItem 
             v-for="expense in expenses" 
             :key="expense.id" 
-            :expense="expense" 
+            :expense="expense"
+            :showGroup="!props.group"
           />
         </div>
       </div>

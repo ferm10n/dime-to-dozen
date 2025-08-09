@@ -17,6 +17,7 @@ const selectedMonth = ref('');
 const editingGroup = ref<string | null>(null);
 const editingAmount = ref<number | undefined>(undefined);
 const viewingGroup = ref<string | null>(null);
+const viewingExpensesModal = ref(false);
 
 // Generate the current month in YYYY-MM format
 const currentMonth = computed(() => {
@@ -102,12 +103,14 @@ function cancelEditGroup() {
   editingAmount.value = undefined;
 }
 
-function startViewExpenses(group: string) {
+function startViewExpenses(group: string | null) {
   viewingGroup.value = group;
+  viewingExpensesModal.value = true;
 }
 
 function cancelViewExpenses() {
   viewingGroup.value = null;
+  viewingExpensesModal.value = false;
 }
 
 function handleUpdateGroup(group: string, newAmount: number) {
@@ -168,10 +171,10 @@ function addExpenseForGroup(group: string) {
             <div class="group-actions">
               <button 
                 class="secondary-btn" 
-                @click="addExpenseForGroup('')"
+                @click="startViewExpenses(null)"
               >
-                <span class="material-icons">add</span>
-                <span>Add Expense</span>
+                <span class="material-icons">receipt_long</span>
+                <span>View All Expenses</span>
               </button>
             </div>
           </div>
@@ -226,7 +229,7 @@ function addExpenseForGroup(group: string) {
     <ViewExpensesModal
       :group="viewingGroup"
       :month="selectedMonth"
-      :isOpen="viewingGroup !== null"
+      :isOpen="viewingExpensesModal"
       @close="cancelViewExpenses"
     />
   </div>
