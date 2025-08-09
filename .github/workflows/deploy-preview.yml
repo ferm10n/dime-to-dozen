@@ -1,13 +1,11 @@
-name: Deploy
+name: Deploy Preview
 on:
-  push:
-    branches: master
   pull_request:
     branches: master
 
 jobs:
   deploy:
-    name: Deploy
+    name: Deploy Preview
     runs-on: ubuntu-latest
 
     permissions:
@@ -26,7 +24,7 @@ jobs:
       - name: Build step
         run: "deno task build"
 
-      - name: Upload to Deno Deploy
+      - name: Upload to Deno Deploy (Preview)
         uses: denoland/deployctl@v1
         with:
           project: "dime-to-dozen"
@@ -36,3 +34,5 @@ jobs:
             dist
             deno.json
             deno.lock
+        env:
+          DATABASE_URL: ${{ secrets.DEV_DB_URL }}
