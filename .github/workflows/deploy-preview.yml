@@ -24,15 +24,8 @@ jobs:
       - name: Build step
         run: 'deno task build'
 
+      - name: Install deployctl
+        run: deno install --global --allow-read --allow-write --allow-env --allow-net --allow-run --no-check -r -f https://deno.land/x/deploy/deployctl.ts
+
       - name: Upload to Deno Deploy (Preview)
-        uses: denoland/deployctl@v1
-        with:
-          project: 'dime-to-dozen'
-          entrypoint: 'server/main.ts'
-          include: |
-            server
-            dist
-            deno.json
-            deno.lock
-        env:
-          DATABASE_URL: ${{ secrets.DEV_DB_URL }}
+        run: deployctl deploy --project=dime-to-dozen --entrypoint=server/main.ts --include=server,dist,deno.json,deno.lock --env=DATABASE_URL=${{ secrets.DEV_DB_URL }}
