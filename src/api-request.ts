@@ -1,14 +1,14 @@
-import type { ApiRouter } from "../server/api/router.js";
+import type { ApiRouter } from '../server/api/router.js';
 
 export function apiRequest<
   ENDPOINT extends keyof ApiRouter,
-  INPUT = ApiRouter[ENDPOINT]["input"],
-  OUTPUT = ApiRouter[ENDPOINT]["output"],
+  INPUT = ApiRouter[ENDPOINT]['input'],
+  OUTPUT = ApiRouter[ENDPOINT]['output'],
 >(endpoint: ENDPOINT, input: INPUT): Promise<OUTPUT> {
   return fetch(endpoint, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(input),
   }).then((response) => {

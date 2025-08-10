@@ -1,7 +1,7 @@
-import { and, eq, SQLWrapper } from "drizzle-orm";
-import { db } from "../db/index.ts";
-import { budgetInsertSchema, budgets } from "../db/schema.ts";
-import { defineEndpoint, ensurePasskey, passkeySchema } from "./util.ts";
+import { and, eq, SQLWrapper } from 'drizzle-orm';
+import { db } from '../db/index.ts';
+import { budgetInsertSchema, budgets } from '../db/schema.ts';
+import { defineEndpoint, ensurePasskey, passkeySchema } from './util.ts';
 
 export const getBudgetEndpoint = defineEndpoint({
   inputSchema: passkeySchema.extend({

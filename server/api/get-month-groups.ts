@@ -1,7 +1,7 @@
-import { eq, sql, sum } from "drizzle-orm";
-import { db } from "../db/index.ts";
-import { budgetInsertSchema, budgets, expenses, groups } from "../db/schema.ts";
-import { defineEndpoint, ensurePasskey, passkeySchema } from "./util.ts";
+import { eq, sql, sum } from 'drizzle-orm';
+import { db } from '../db/index.ts';
+import { budgetInsertSchema, budgets, expenses, groups } from '../db/schema.ts';
+import { defineEndpoint, ensurePasskey, passkeySchema } from './util.ts';
 
 export const getMonthGroupsEndpoint = defineEndpoint({
   inputSchema: passkeySchema.extend({
@@ -22,23 +22,23 @@ export const getMonthGroupsEndpoint = defineEndpoint({
     const expensesSubquery = db
       .select({
         group: expenses.group,
-        totalSpent: sum(expenses.amount).as("total_spent"),
+        totalSpent: sum(expenses.amount).as('total_spent'),
       })
       .from(expenses)
       .where(eq(expenses.month, month))
       .groupBy(expenses.group)
-      .as("expenses_totals");
+      .as('expenses_totals');
 
     // Then a subquery for budgets per group
     const budgetsSubquery = db
       .select({
         group: budgets.group,
-        totalBudgeted: sum(budgets.amount).as("total_budgeted"),
+        totalBudgeted: sum(budgets.amount).as('total_budgeted'),
       })
       .from(budgets)
       .where(eq(budgets.month, month))
       .groupBy(budgets.group)
-      .as("budgets_totals");
+      .as('budgets_totals');
 
     const results = await db
       .select({

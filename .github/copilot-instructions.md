@@ -91,6 +91,7 @@ agent environment. The repository has jsr.io in its firewall allowlist, so
 dependency installation should work without issues.
 
 If you encounter any connectivity problems:
+
 - Frontend development can continue independently if backend dependencies fail
 - Use static file serving for testing built application if needed
 

@@ -1,8 +1,8 @@
-import { db } from "../db/index.ts";
-import { expenses } from "../db/schema.ts";
-import { defineEndpoint, ensurePasskey, passkeySchema } from "./util.ts";
-import { z } from "zod/v4";
-import { eq } from "drizzle-orm";
+import { db } from '../db/index.ts';
+import { expenses } from '../db/schema.ts';
+import { defineEndpoint, ensurePasskey, passkeySchema } from './util.ts';
+import { z } from 'zod/v4';
+import { eq } from 'drizzle-orm';
 
 export const editExpenseEndpoint = defineEndpoint({
   inputSchema: passkeySchema.extend({
@@ -12,7 +12,7 @@ export const editExpenseEndpoint = defineEndpoint({
     group: z.string().min(3),
     created_by: z.string().min(3),
     month: z.string().regex(/^\d{4}-\d{2}$/, {
-      message: "Month must be in format YYYY-MM",
+      message: 'Month must be in format YYYY-MM',
     }),
   }),
   handler: async (body) => {
@@ -27,9 +27,9 @@ export const editExpenseEndpoint = defineEndpoint({
       .returning();
 
     if (updatedExpense.length === 0) {
-      throw new Response("Expense not found", {
+      throw new Response('Expense not found', {
         status: 404,
-        headers: { "content-type": "text/plain" },
+        headers: { 'content-type': 'text/plain' },
       });
     }
 

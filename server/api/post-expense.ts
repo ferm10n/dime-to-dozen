@@ -1,6 +1,6 @@
-import { db } from "../db/index.ts";
-import { expenseInsertSchema, expenses, groups } from "../db/schema.ts";
-import { defineEndpoint, ensurePasskey, passkeySchema } from "./util.ts";
+import { db } from '../db/index.ts';
+import { expenseInsertSchema, expenses, groups } from '../db/schema.ts';
+import { defineEndpoint, ensurePasskey, passkeySchema } from './util.ts';
 
 export const postExpenseEndpoint = defineEndpoint({
   inputSchema: passkeySchema.extend({
@@ -8,7 +8,7 @@ export const postExpenseEndpoint = defineEndpoint({
     month: expenseInsertSchema.shape.month.default(() => {
       const now = new Date();
       return `${now.getFullYear()}-${
-        String(now.getMonth() + 1).padStart(2, "0")
+        String(now.getMonth() + 1).padStart(2, '0')
       }`;
     }),
   }),

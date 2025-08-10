@@ -1,8 +1,8 @@
-import { db } from "../db/index.ts";
-import { budgetInsertSchema, budgets } from "../db/schema.ts";
-import { defineEndpoint, ensurePasskey, passkeySchema } from "./util.ts";
-import { and, eq, inArray } from "drizzle-orm";
-import { z } from "zod/v4";
+import { db } from '../db/index.ts';
+import { budgetInsertSchema, budgets } from '../db/schema.ts';
+import { defineEndpoint, ensurePasskey, passkeySchema } from './util.ts';
+import { and, eq, inArray } from 'drizzle-orm';
+import { z } from 'zod/v4';
 
 export const copyMonthBudgetEndpoint = defineEndpoint({
   inputSchema: passkeySchema.extend({
