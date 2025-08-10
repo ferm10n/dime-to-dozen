@@ -18,6 +18,8 @@ error.
 - Install dependencies: `deno install` -- takes 10-15 seconds. NEVER CANCEL. Set
   timeout to 60+ seconds.
 - Create environment file: `cp .env.example .env`
+- (Optional) Setup development tools: `./scripts/setup-dev` -- installs
+  pre-commit hook for formatting
 
 ### Build and Development
 
@@ -82,14 +84,14 @@ When database connectivity is available:
 
 ## Common Issues and Solutions
 
-### JSR Network Connectivity Issues
+### Network Connectivity
 
-If `@std/dotenv` or other JSR packages fail to download:
+JSR packages (`@std/dotenv`, `@std/http`, etc.) should download successfully in
+the AI agent environment. If you encounter connectivity issues:
 
-- This is a known issue in restricted network environments
-- Frontend development can continue independently
-- Use static file serving for testing built application
-- Backend functionality requires resolving network connectivity
+- Verify the repository has jsr.io in its firewall allowlist
+- Frontend development can continue independently if backend dependencies fail
+- Use static file serving for testing built application if needed
 
 ### Environment Variables
 
@@ -99,6 +101,9 @@ Required for full functionality:
 - `APP_PASSKEY` - Application authentication key
 - `SECRET_KEY` - Application secret
 - `PORT` - Server port (defaults to 6960)
+
+For AI agent environments, `DEV_PG_URL` may be available as a repository secret
+to provide database connectivity for testing.
 
 ## Project Structure
 
