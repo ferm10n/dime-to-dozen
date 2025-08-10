@@ -43,6 +43,12 @@ const isActive = (path: string) => {
         <span class="material-icons">content_copy</span>
         <span>Copy Groups</span>
       </div>
+      <div class="nav-item" 
+           @click="navigateTo('/budget-transfer')" 
+           :class="{ 'active': isActive('/budget-transfer') }">
+        <span class="material-icons">swap_horiz</span>
+        <span>Budget Transfer</span>
+      </div>
       <div class="nav-item" @click="emit('passkey')">
         <span class="material-icons">vpn_key</span>
         <span>Set Passkey</span>
