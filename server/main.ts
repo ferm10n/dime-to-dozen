@@ -6,8 +6,11 @@ import { ApiEndpointDef, parseOrDie } from './api/util.ts';
 
 // checking if the dev db is set:
 console.log({
-  DATABASE_URL_HASH: await crypto.subtle.digest("SHA-256", new TextEncoder().encode(Deno.env.get("DATABASE_URL") || "")),
-})
+  DATABASE_URL_HASH: await crypto.subtle.digest(
+    'SHA-256',
+    new TextEncoder().encode(Deno.env.get('DATABASE_URL') || ''),
+  ),
+});
 
 function jsonResponse(payload: unknown) {
   return new Response(JSON.stringify(payload), {
