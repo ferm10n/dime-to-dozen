@@ -4,7 +4,7 @@ export function apiRequest<
   ENDPOINT extends keyof ApiRouter,
   INPUT = ApiRouter[ENDPOINT]['input'],
   OUTPUT = ApiRouter[ENDPOINT]['output'],
-> (endpoint: ENDPOINT, input: INPUT): Promise<OUTPUT> {
+>(endpoint: ENDPOINT, input: INPUT): Promise<OUTPUT> {
   return fetch(endpoint, {
     method: 'POST',
     headers: {
@@ -17,5 +17,4 @@ export function apiRequest<
     }
     return response.json() as Promise<OUTPUT>;
   });
-  
 }
