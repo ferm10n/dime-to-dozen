@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { useLocalStorage } from '@vueuse/core';
-import { computed } from "vue";
+import { computed } from 'vue';
 
 export const useStore = defineStore('main', () => {
   const localStorageData = useLocalStorage('data', {

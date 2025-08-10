@@ -1,0 +1,18 @@
+#!/bin/sh
+# Pre-commit hook to ensure code formatting consistency
+
+# Check if deno is available
+if ! command -v deno >/dev/null 2>&1; then
+    echo "Warning: Deno not found in PATH. Skipping format check."
+    exit 0
+fi
+
+# Check formatting
+echo "Checking code formatting..."
+if ! deno fmt --check; then
+    echo "Code formatting issues found. Run 'deno fmt' to fix them."
+    exit 1
+fi
+
+echo "Code formatting check passed."
+exit 0

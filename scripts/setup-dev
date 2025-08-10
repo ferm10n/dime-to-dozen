@@ -1,0 +1,16 @@
+#!/bin/sh
+# Setup script to install development tools
+
+echo "Setting up development environment..."
+
+# Install pre-commit hook
+if [ -f scripts/pre-commit ]; then
+    cp scripts/pre-commit .git/hooks/pre-commit
+    chmod +x .git/hooks/pre-commit
+    echo "✓ Pre-commit hook installed (enforces deno fmt)"
+else
+    echo "✗ Pre-commit script not found"
+    exit 1
+fi
+
+echo "✓ Development setup complete"
