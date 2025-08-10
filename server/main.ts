@@ -4,8 +4,10 @@ import { serveDir } from "@std/http/file-server";
 import { router } from "./api/router.ts";
 import { ApiEndpointDef, parseOrDie } from "./api/util.ts";
 
-// const secret = Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b => b.toString(16).padStart(2, "0")).join("");
-// console.log("Generated secret:", secret);
+// checking if the dev db is set:
+console.log({
+  DATABASE_URL_HASH: await crypto.subtle.digest("SHA-256", new TextEncoder().encode(Deno.env.get("DATABASE_URL") || "")),
+})
 
 function jsonResponse (payload: unknown) {
   return new Response(JSON.stringify(payload), {
