@@ -86,10 +86,11 @@ When database connectivity is available:
 
 ### Network Connectivity
 
-JSR packages (`@std/dotenv`, `@std/http`, etc.) should download successfully in
-the AI agent environment. If you encounter connectivity issues:
+JSR packages (`@std/dotenv`, `@std/http`, etc.) download successfully in the AI
+agent environment. The repository has jsr.io in its firewall allowlist, so
+dependency installation should work without issues.
 
-- Verify the repository has jsr.io in its firewall allowlist
+If you encounter any connectivity problems:
 - Frontend development can continue independently if backend dependencies fail
 - Use static file serving for testing built application if needed
 
