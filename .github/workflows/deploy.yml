@@ -1,0 +1,93 @@
+# Combined deployment workflow for Dime To Dozen
+# - Preview deploys on pull requests
+# - Production deploys on push to master
+# Best practices: uses jobs, environment variables, and caching
+
+name: Deploy
+
+on:
+  pull_request:
+    branches:
+      - "*"
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy-preview:
+    name: Deploy Preview
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Needed for auth with Deno Deploy
+      contents: read # Needed to clone the repository
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Cache Deno dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/deno
+          key: ${{ runner.os }}-deno-${{ hashFiles('deno.lock') }}
+
+      - name: Install dependencies
+        run: deno install
+
+      - name: Type check
+        run: deno check
+
+      - name: Build frontend
+        run: deno task build
+
+      - name: Install deployctl
+        run: deno install -gArf jsr:@deno/deployctl
+
+      - name: Deploy preview
+        env:
+          DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN }}
+        run: deployctl deploy --project=dime-to-dozen --entrypoint=server/main.ts --include=server,dist,deno.json,deno.lock --env=DATABASE_URL=${{ secrets.DEV_DB_URL }}
+
+  deploy-production:
+    name: Deploy Production
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Needed for auth with Deno Deploy
+      contents: read # Needed to clone the repository
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Cache Deno dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/deno
+          key: ${{ runner.os }}-deno-${{ hashFiles('deno.lock') }}
+
+      - name: Install dependencies
+        run: deno install
+
+      - name: Type check
+        run: deno check
+
+      - name: Build frontend
+        run: deno task build
+
+      - name: Install deployctl
+        run: deno install -gArf jsr:@deno/deployctl
+
+      - name: Deploy production
+        env:
+          DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN }}
+        run: deployctl deploy --prod --project=dime-to-dozen --entrypoint=server/main.ts --include=server,dist,deno.json,deno.lock --env=DATABASE_URL=${{ secrets.DEV_DB_URL }}

@@ -1,4 +1,4 @@
-import type { ApiRouter } from '../server/api/router.js';
+import type { ApiRouter } from '../server/api/router.ts';
 
 export function apiRequest<
   ENDPOINT extends keyof ApiRouter,
