@@ -6,6 +6,7 @@ export const useStore = defineStore('main', () => {
   const localStorageData = useLocalStorage('data', {
     passkey: '',
     created_by: '',
+    showHidden: true,
   });
 
   const passkey = computed({
@@ -18,8 +19,14 @@ export const useStore = defineStore('main', () => {
     set: (value) => localStorageData.value.created_by = value,
   });
 
+  const showHidden = computed({
+    get: () => localStorageData.value.showHidden,
+    set: (value) => localStorageData.value.showHidden = value,
+  });
+
   return {
     passkey,
     createdBy,
+    showHidden,
   };
 });

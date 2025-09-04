@@ -34,6 +34,14 @@ const totalSpent = computed(() => {
   return monthGroups.value.reduce((total, group) => total + group.spent, 0);
 });
 
+// Filtered groups based on the show hidden toggle
+const filteredGroups = computed(() => {
+  if (store.showHidden) {
+    return monthGroups.value;
+  }
+  return monthGroups.value.filter(group => group.budgeted > 0);
+});
+
 onMounted(() => {
   // Check for month parameter in URL
   const monthParam = route.query.month as string;
@@ -129,6 +137,10 @@ function addExpenseForGroup(group: string) {
     }
   });
 }
+
+function toggleShowHidden() {
+  store.showHidden = !store.showHidden;
+}
 </script>
 
 <template>
@@ -179,8 +191,21 @@ function addExpenseForGroup(group: string) {
             </div>
           </div>
           
+          <div class="toggle-control">
+            <button 
+              class="toggle-btn"
+              :class="{ active: store.showHidden }"
+              @click="toggleShowHidden"
+            >
+              <span class="material-icons">
+                {{ store.showHidden ? 'visibility' : 'visibility_off' }}
+              </span>
+              <span>Show Hidden</span>
+            </button>
+          </div>
+          
           <div 
-            v-for="group in monthGroups" 
+            v-for="group in filteredGroups" 
             :key="group.group"
             class="budget-group"
           >
@@ -411,6 +436,39 @@ select.form-input option {
 .add-expense-btn:hover {
   background-color: rgba(255, 235, 59, 0.1);
   color: var(--accent-color);
+}
+
+.toggle-control {
+  margin-bottom: 16px;
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+}
+
+.toggle-btn:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.toggle-btn.active {
+  background-color: var(--accent-color);
+  color: #1a1a1a;
+  border-color: var(--accent-color);
+}
+
+.toggle-btn.active:hover {
+  background-color: rgba(255, 235, 59, 0.9);
 }
 
 @media (prefers-color-scheme: dark) {
