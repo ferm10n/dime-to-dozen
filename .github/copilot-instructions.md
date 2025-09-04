@@ -146,10 +146,18 @@ to provide database connectivity for testing.
 
 ## Deployment
 
-- Application deploys to Deno Deploy via GitHub Actions
-- Triggered on pushes to master branch
-- Build step runs automatically in CI/CD
-- Static assets and server code are deployed together
+Application deploys to Deno Deploy via GitHub Actions using the deployctl CLI.
+Deployment is triggered on pushes to the master branch.
+The build step runs automatically in CI/CD.
+Static assets and server code are deployed together.
+
+Deployment uses the deployctl CLI to support environment variables and advanced configuration.
+
+To install deployctl locally:
+- `deno install -gArf jsr:@deno/deployctl`
+- `export PATH="/home/node/.deno/bin:$PATH"` (if not already in PATH)
+
+The GitHub Actions workflow invokes deployctl for deployment, ensuring environment variables are properly set.
 
 ## Performance Notes
 
