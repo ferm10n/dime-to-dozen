@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { computed, nextTick, ref, onMounted, watch } from 'vue';
 import { apiRequest } from '../api-request';
 import { useStore } from '../store';
 import ExpenseItem from './ExpenseItem.vue';
@@ -28,6 +28,9 @@ const store = useStore();
 const expenses = ref<Expense[]>([]);
 const isLoading = ref(false);
 const error = ref<string | null>(null);
+const filterText = ref('');
+const showFilter = ref(false);
+const filterInputRef = ref<HTMLInputElement | null>(null);
 
 // Fetch expenses when modal opens
 watch(() => props.isOpen, (isOpen) => {
@@ -81,10 +84,46 @@ function closeModal() {
   emit('close');
 }
 
-const totalSpent = ref(0);
-watch(expenses, (newExpenses) => {
-  totalSpent.value = newExpenses.reduce((sum, expense) => sum + expense.amount, 0);
-}, { immediate: true });
+// Filter expenses based on search text
+const filteredExpenses = computed(() => {
+  if (!filterText.value.trim()) {
+    return expenses.value;
+  }
+  
+  const searchText = filterText.value.toLowerCase().trim();
+  return expenses.value.filter((expense) => {
+    // Search across all fields in the Expense type
+    return (
+      expense.id.toString().includes(searchText) ||
+      expense.note.toLowerCase().includes(searchText) ||
+      expense.amount.toString().includes(searchText) ||
+      expense.group.toLowerCase().includes(searchText) ||
+      expense.created_at.toLowerCase().includes(searchText) ||
+      expense.created_by.toLowerCase().includes(searchText) ||
+      expense.month.toLowerCase().includes(searchText)
+    );
+  });
+});
+
+const totalSpent = computed(() => {
+  return filteredExpenses.value.reduce((sum, expense) => sum + expense.amount, 0);
+});
+
+const isFilterActive = computed(() => {
+  return filterText.value.trim() !== '';
+});
+
+function toggleFilter() {
+  showFilter.value = !showFilter.value;
+  if (!showFilter.value) {
+    filterText.value = '';
+  } else {
+    // Focus the input after it's rendered
+    nextTick(() => {
+      filterInputRef.value?.focus();
+    });
+  }
+}
 </script>
 
 <template>
@@ -100,7 +139,31 @@ watch(expenses, (newExpenses) => {
       <div class="view-expenses-body modal-body">
         <div class="expense-summary">
           <span class="expense-total">Total: ${{ totalSpent.toFixed(2) }}</span>
-          <span class="expense-count">{{ expenses.length }} expense{{ expenses.length !== 1 ? 's' : '' }}</span>
+          <div class="expense-count-wrapper">
+            <span class="expense-count">{{ filteredExpenses.length }} expense{{ filteredExpenses.length !== 1 ? 's' : '' }}</span>
+            <button 
+              class="filter-toggle-btn" 
+              @click="toggleFilter"
+              :class="{ 'filter-active': isFilterActive }"
+              :title="showFilter ? 'Hide filter' : 'Show filter'"
+              :aria-label="showFilter ? 'Hide expense filter' : 'Show expense filter'"
+              :aria-pressed="showFilter"
+            >
+              <span class="material-icons">filter_list</span>
+            </button>
+          </div>
+        </div>
+        
+        <div v-if="showFilter" class="filter-row">
+          <input 
+            ref="filterInputRef"
+            v-model="filterText"
+            type="text"
+            class="filter-input"
+            placeholder="Filter expenses..."
+            aria-label="Filter expenses by any field"
+            @keydown.escape="toggleFilter"
+          />
         </div>
         
         <div v-if="isLoading" class="expense-loading">
@@ -116,6 +179,11 @@ watch(expenses, (newExpenses) => {
           </button>
         </div>
         
+        <div v-else-if="filteredExpenses.length === 0 && isFilterActive" class="no-expenses">
+          <span class="material-icons">search_off</span>
+          <p>No expenses match your filter</p>
+        </div>
+        
         <div v-else-if="expenses.length === 0" class="no-expenses">
           <span class="material-icons">receipt_long</span>
           <p>No expenses found for this budget group</p>
@@ -123,7 +191,7 @@ watch(expenses, (newExpenses) => {
         
         <div v-else class="expense-list">
           <ExpenseItem 
-            v-for="expense in expenses" 
+            v-for="expense in filteredExpenses" 
             :key="expense.id" 
             :expense="expense"
             :showGroup="!props.group"
@@ -147,7 +215,7 @@ watch(expenses, (newExpenses) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   padding-bottom: 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -158,10 +226,91 @@ watch(expenses, (newExpenses) => {
   color: #FFC107; /* Yellow accent color */
 }
 
+.expense-count-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .expense-count {
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.9rem;
 }
+
+.filter-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  min-width: auto;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: none;
+}
+
+.filter-toggle-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  box-shadow: none;
+}
+
+.filter-toggle-btn.filter-active {
+  background-color: rgba(255, 193, 7, 0.2);
+  border-color: rgba(255, 193, 7, 0.5);
+  color: #FFC107;
+}
+
+.filter-toggle-btn.filter-active:hover {
+  background-color: rgba(255, 193, 7, 0.3);
+}
+
+.filter-toggle-btn .material-icons {
+  font-size: 20px;
+}
+
+.filter-row {
+  margin-bottom: 16px;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.filter-input {
+  width: 100%;
+  padding: 10px 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.87);
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.filter-input:focus {
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: #FFC107;
+  box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.1);
+}
+
+.filter-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
 
 .expense-loading {
   display: flex;
