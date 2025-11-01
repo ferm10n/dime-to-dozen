@@ -109,6 +109,10 @@ const totalSpent = computed(() => {
   return filteredExpenses.value.reduce((sum, expense) => sum + expense.amount, 0);
 });
 
+const isFilterActive = computed(() => {
+  return filterText.value.trim() !== '';
+});
+
 function toggleFilter() {
   showFilter.value = !showFilter.value;
   if (!showFilter.value) {
@@ -140,7 +144,7 @@ function toggleFilter() {
             <button 
               class="filter-toggle-btn" 
               @click="toggleFilter"
-              :class="{ 'filter-active': filterText.trim() !== '' }"
+              :class="{ 'filter-active': isFilterActive }"
               :title="showFilter ? 'Hide filter' : 'Show filter'"
               :aria-label="showFilter ? 'Hide expense filter' : 'Show expense filter'"
               :aria-pressed="showFilter"
@@ -175,7 +179,7 @@ function toggleFilter() {
           </button>
         </div>
         
-        <div v-else-if="filteredExpenses.length === 0 && filterText.trim() !== ''" class="no-expenses">
+        <div v-else-if="filteredExpenses.length === 0 && isFilterActive" class="no-expenses">
           <span class="material-icons">search_off</span>
           <p>No expenses match your filter</p>
         </div>
