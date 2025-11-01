@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, watch } from 'vue';
+import { computed, nextTick, ref, onMounted, watch } from 'vue';
 import { apiRequest } from '../api-request';
 import { useStore } from '../store';
 import ExpenseItem from './ExpenseItem.vue';
@@ -30,6 +30,7 @@ const isLoading = ref(false);
 const error = ref<string | null>(null);
 const filterText = ref('');
 const showFilter = ref(false);
+const filterInputRef = ref<HTMLInputElement | null>(null);
 
 // Fetch expenses when modal opens
 watch(() => props.isOpen, (isOpen) => {
@@ -112,6 +113,11 @@ function toggleFilter() {
   showFilter.value = !showFilter.value;
   if (!showFilter.value) {
     filterText.value = '';
+  } else {
+    // Focus the input after it's rendered
+    nextTick(() => {
+      filterInputRef.value?.focus();
+    });
   }
 }
 </script>
@@ -136,6 +142,8 @@ function toggleFilter() {
               @click="toggleFilter"
               :class="{ 'filter-active': filterText.trim() !== '' }"
               :title="showFilter ? 'Hide filter' : 'Show filter'"
+              :aria-label="showFilter ? 'Hide expense filter' : 'Show expense filter'"
+              :aria-pressed="showFilter"
             >
               <span class="material-icons">filter_list</span>
             </button>
@@ -144,10 +152,12 @@ function toggleFilter() {
         
         <div v-if="showFilter" class="filter-row">
           <input 
+            ref="filterInputRef"
             v-model="filterText"
             type="text"
             class="filter-input"
             placeholder="Filter expenses..."
+            aria-label="Filter expenses by any field"
             @keydown.escape="toggleFilter"
           />
         </div>
