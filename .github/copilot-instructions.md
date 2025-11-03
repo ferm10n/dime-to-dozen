@@ -27,7 +27,9 @@ error.
   Set timeout to 30+ seconds.
 - Start frontend dev server: `deno task dev` -- starts in 1-2 seconds. NEVER
   CANCEL. Set timeout to 30+ seconds.
-  - Serves at http://127.0.0.1:5173/
+  - Serves at http://localhost:5173/ (also accessible via network interfaces)
+  - Configured to listen on 0.0.0.0 for accessibility from external tools (e.g.,
+    Playwright MCP)
   - Hot reloading enabled
 - Start API server: `deno task serve` -- may fail due to JSR network
   connectivity issues in restricted environments
@@ -51,7 +53,7 @@ After making changes to the frontend:
 
 1. Run `deno task build` to ensure build succeeds
 2. Start dev server with `deno task dev`
-3. Navigate to http://127.0.0.1:5173/
+3. Navigate to http://localhost:5173/ (or via network IP if accessing remotely)
 4. Test routing: navigate to `/monthly-overview` and `/copy-groups`
 5. Verify Material Design dark theme is applied
 6. Test mobile responsiveness (Material Design components should be
