@@ -7,6 +7,7 @@ export default defineConfig({
   plugins: [deno(), vue()],
   server: {
     host: '0.0.0.0', // Listen on all interfaces to allow external access (e.g., Playwright MCP)
+    // Note: This is for development only. Use appropriate firewalls in production.
     proxy: {
       '/api': {
         target: 'http://localhost:6960',
