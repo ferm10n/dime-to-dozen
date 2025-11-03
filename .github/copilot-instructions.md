@@ -4,9 +4,20 @@ Dime To Dozen is a full-stack web application for expense tracking and budget
 management. Built with Deno, Vue 3, TypeScript, and Material Design, it features
 a mobile-first dark theme interface.
 
-Always follow these instructions first and only fallback to additional search
-and context gathering if the information here is incomplete or found to be in
-error.
+
+## Automated Troubleshooting and Validation
+
+When troubleshooting or validating the application, always prefer using the Playwright Model Context Protocol (MCP) for end-to-end browser automation. This includes:
+
+- Running Playwright MCP tests to validate UI and routing
+- Taking screenshots of relevant application states and saving them to the `docs/` folder (e.g., `docs/screenshots/`)
+- Using Playwright MCP to automate navigation, form submissions, and error state capture
+
+## Environment Setup Automation
+
+When setting up the environment for development or testing, if a `DEV_DATABASE_URL` is available (such as from repository secrets or CI), automatically write it to the `.env` file as `DATABASE_URL`. The deno server can now be started for additional testing.
+
+Always follow these instructions first and only fallback to additional search and context gathering if the information here is incomplete or found to be in error.
 
 ## Working Effectively
 
