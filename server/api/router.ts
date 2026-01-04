@@ -8,6 +8,7 @@ import { copyMonthBudgetEndpoint } from './copy-month-budget.ts';
 import { editBudgetGroupEndpoint } from './edit-budget-group.ts';
 import { editExpenseEndpoint } from './edit-expense.ts';
 import { deleteExpenseEndpoint } from './delete-expense.ts';
+import { transferBudgetEndpoint } from './transfer-budget.ts';
 import { ApiEndpointDef } from './util.ts';
 
 export const router = {
@@ -20,6 +21,7 @@ export const router = {
   '/api/get-month-groups': getMonthGroupsEndpoint,
   '/api/copy-month-budget': copyMonthBudgetEndpoint,
   '/api/edit-budget-group': editBudgetGroupEndpoint,
+  '/api/transfer-budget': transferBudgetEndpoint,
 } satisfies {
   [path: string]: ApiEndpointDef<z.ZodType | null, unknown>;
 };
