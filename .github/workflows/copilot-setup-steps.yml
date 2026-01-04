@@ -37,4 +37,8 @@ jobs:
           deno-version: v2.x
 
       - name: Install dependencies
-        run: deno install
+        run: deno install --frozen
+      
+      - name: start local db and insert sample data
+        run: |
+          ./scripts/start-local-db.sh

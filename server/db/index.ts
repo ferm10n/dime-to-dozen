@@ -1,4 +1,4 @@
-import { drizzle } from 'drizzle-orm/neon-http';
+import { drizzle } from 'drizzle-orm/node-postgres';
 const databaseUrl = Deno.env.get('DATABASE_URL');
 if (!databaseUrl) {
   throw new Error('DATABASE_URL environment variable is not set');
