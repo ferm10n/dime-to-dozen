@@ -9,8 +9,7 @@
     "preview": "deno run -A --node-modules-dir npm:vite preview",
     "serve": "deno run --watch --allow-env --allow-net --allow-read server/main.ts",
     "db:push": "deno --env -A --node-modules-dir npm:drizzle-kit push",
-    "deploy": "deployctl deploy '--include=dist,server,deno.*' --project=dime-to-dozen --entrypoint=server/main.ts --prod",
-    "check:server": "deno check server/main.ts"
+    "deploy": "deployctl deploy '--include=dist,server,deno.*' --project=dime-to-dozen --entrypoint=server/main.ts --prod"
   },
   "compilerOptions": {
     "lib": [
@@ -19,6 +18,10 @@
       "DOM.Iterable"
     ]
   },
+  "exclude": [
+    ".vite",
+    "dist"
+  ],
   "imports": {
     "@deno/vite-plugin": "npm:@deno/vite-plugin@^1.0.4",
     "@neondatabase/serverless": "npm:@neondatabase/serverless@^1.0.0",

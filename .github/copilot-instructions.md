@@ -50,7 +50,7 @@ Playwright MCP for end-to-end browser automation. This includes:
 ## Validation
 
 1. Run `deno task build` to ensure FE build succeeds
-1. Check the server code with `deno run check:server`
+1. Check code for type correctness with `deno check`
 1. Start the backend server with `deno task serve`
 1. Start dev server with `deno task dev`
 1. Navigate to http://localhost:5173/
