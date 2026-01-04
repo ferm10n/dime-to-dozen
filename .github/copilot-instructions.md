@@ -17,12 +17,10 @@ When troubleshooting or validating the application, always prefer using the Play
 
 ### Bootstrap and Setup
 
-- Install Deno: `curl -fsSL https://deno.land/install.sh | sh`
-- Add to PATH: `export PATH="/home/runner/.deno/bin:$PATH"`
-- For AI agents, set TLS: `export DENO_TLS_CA_STORE=mozilla,system`
-- Install dependencies: `deno install` -- takes 10-15 seconds. NEVER CANCEL. Set
+- Install Deno (if not already installed): `curl -fsSL https://deno.land/install.sh | sh`
+  - Add to PATH: `export PATH="/home/runner/.deno/bin:$PATH"`
+  - Install dependencies: `deno install` -- takes 10-15 seconds. NEVER CANCEL. Set
   timeout to 60+ seconds.
-- Create environment file: `cp .env.example .env`
 - (Optional) Setup development tools: `./scripts/setup-dev` -- installs
   pre-commit hook for formatting
 
