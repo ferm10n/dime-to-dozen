@@ -4,9 +4,14 @@ Dime To Dozen is a full-stack web application for expense tracking and budget
 management. Built with Deno, Vue 3, TypeScript, and Material Design, it features
 a mobile-first dark theme interface.
 
-Always follow these instructions first and only fallback to additional search
-and context gathering if the information here is incomplete or found to be in
-error.
+
+## Automated Troubleshooting and Validation
+
+When troubleshooting or validating the application, always prefer using the Playwright Model Context Protocol (MCP) for end-to-end browser automation. This includes:
+
+- Running Playwright MCP tests to validate UI and routing
+- Taking screenshots of relevant application states and saving them to the `docs/` folder (e.g., `docs/screenshots/`)
+- Using Playwright MCP to automate navigation, form submissions, and error state capture
 
 ## Working Effectively
 
@@ -29,11 +34,7 @@ error.
   CANCEL. Set timeout to 30+ seconds.
   - Serves at http://127.0.0.1:5173/
   - Hot reloading enabled
-- Start API server: `deno task serve` -- may fail due to JSR network
-  connectivity issues in restricted environments
-  - If failing, the frontend can still be developed and tested independently
-- Serve built files: `python3 -m http.server 8080 --directory dist` (alternative
-  static serving)
+- Start API server: `deno task serve`
 
 ### Code Quality
 
@@ -43,36 +44,16 @@ error.
 - Lint code: `deno lint` -- checks for code quality issues
 - Always run `deno fmt` and `deno lint` before committing changes
 
-## Validation Scenarios
+## Validation
 
-### Frontend Validation
-
-After making changes to the frontend:
-
-1. Run `deno task build` to ensure build succeeds
+1. Run `deno task build` to ensure FE build succeeds
+1. Check the server code with `deno run check:server`
+1. Start the backend server with `deno task serve`
 2. Start dev server with `deno task dev`
 3. Navigate to http://127.0.0.1:5173/
-4. Test routing: navigate to `/monthly-overview` and `/copy-groups`
-5. Verify Material Design dark theme is applied
-6. Test mobile responsiveness (Material Design components should be
-   mobile-first)
 7. Check browser console for errors
-
-### Full Stack Validation
-
-When database connectivity is available:
-
-1. Ensure DATABASE_URL is set in .env file
-2. Run `deno task serve` to start API server
-3. Test API endpoints work with the frontend
 4. Verify expense creation, budget management, and monthly overview
    functionality
-
-### Build Validation
-
-- Built files are generated in `dist/` directory
-- Static assets are properly referenced
-- Application loads correctly when served statically
 
 ## Database Operations
 
@@ -84,28 +65,12 @@ When database connectivity is available:
 
 ## Common Issues and Solutions
 
-### Network Connectivity
-
-JSR packages (`@std/dotenv`, `@std/http`, etc.) download successfully in the AI
-agent environment. The repository has jsr.io in its firewall allowlist, so
-dependency installation should work without issues.
-
-If you encounter any connectivity problems:
-
-- Frontend development can continue independently if backend dependencies fail
-- Use static file serving for testing built application if needed
-
 ### Environment Variables
 
 Required for full functionality:
 
 - `DATABASE_URL` - PostgreSQL connection string
 - `APP_PASSKEY` - Application authentication key
-- `SECRET_KEY` - Application secret
-- `PORT` - Server port (defaults to 6960)
-
-For AI agent environments, `DEV_PG_URL` may be available as a repository secret
-to provide database connectivity for testing.
 
 ## Project Structure
 
