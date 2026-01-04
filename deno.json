@@ -9,7 +9,8 @@
     "preview": "deno run -A --node-modules-dir npm:vite preview",
     "serve": "deno run --watch --allow-env --allow-net --allow-read server/main.ts",
     "db:push": "deno --env -A --node-modules-dir npm:drizzle-kit push",
-    "deploy": "deployctl deploy '--include=dist,server,deno.*' --project=dime-to-dozen --entrypoint=server/main.ts --prod"
+    "deploy": "deployctl deploy '--include=dist,server,deno.*' --project=dime-to-dozen --entrypoint=server/main.ts --prod",
+    "check:server": "deno check server/main.ts"
   },
   "compilerOptions": {
     "lib": [
