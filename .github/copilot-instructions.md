@@ -4,23 +4,26 @@ Dime To Dozen is a full-stack web application for expense tracking and budget
 management. Built with Deno, Vue 3, TypeScript, and Material Design, it features
 a mobile-first dark theme interface.
 
-
 ## Automated Troubleshooting and Validation
 
-When troubleshooting or validating the application, always prefer using the Playwright Model Context Protocol (MCP) for end-to-end browser automation. This includes:
+When troubleshooting or validating the application, always prefer using the
+Playwright MCP for end-to-end browser automation. This includes:
 
 - Running Playwright MCP tests to validate UI and routing
-- Taking screenshots of relevant application states and saving them to the `docs/` folder (e.g., `docs/screenshots/`)
-- Using Playwright MCP to automate navigation, form submissions, and error state capture
+- Taking screenshots of relevant application states and saving them to the
+  `docs/` folder (e.g., `docs/screenshots/`)
+- Using Playwright MCP to automate navigation, form submissions, and error state
+  capture
 
 ## Working Effectively
 
 ### Bootstrap and Setup
 
-- Install Deno (if not already installed): `curl -fsSL https://deno.land/install.sh | sh`
+- Install Deno (if not already installed):
+  `curl -fsSL https://deno.land/install.sh | sh`
   - Add to PATH: `export PATH="/home/runner/.deno/bin:$PATH"`
-  - Install dependencies: `deno install` -- takes 10-15 seconds. NEVER CANCEL. Set
-  timeout to 60+ seconds.
+  - Install dependencies: `deno install` -- takes 10-15 seconds. NEVER CANCEL.
+    Set timeout to 60+ seconds.
 - (Optional) Setup development tools: `./scripts/setup-dev` -- installs
   pre-commit hook for formatting
 
@@ -30,7 +33,9 @@ When troubleshooting or validating the application, always prefer using the Play
   Set timeout to 30+ seconds.
 - Start frontend dev server: `deno task dev` -- starts in 1-2 seconds. NEVER
   CANCEL. Set timeout to 30+ seconds.
-  - Serves at http://127.0.0.1:5173/
+  - Serves at http://localhost:5173/ (also accessible via network interfaces)
+  - Configured to listen on 0.0.0.0 for accessibility from external tools (e.g.,
+    Playwright MCP)
   - Hot reloading enabled
 - Start API server: `deno task serve`
 
@@ -47,10 +52,10 @@ When troubleshooting or validating the application, always prefer using the Play
 1. Run `deno task build` to ensure FE build succeeds
 1. Check the server code with `deno run check:server`
 1. Start the backend server with `deno task serve`
-2. Start dev server with `deno task dev`
-3. Navigate to http://127.0.0.1:5173/
-7. Check browser console for errors
-4. Verify expense creation, budget management, and monthly overview
+1. Start dev server with `deno task dev`
+1. Navigate to http://localhost:5173/
+1. Check browser console for errors
+1. Verify expense creation, budget management, and monthly overview
    functionality
 
 ## Database Operations
@@ -65,7 +70,8 @@ When troubleshooting or validating the application, always prefer using the Play
 
 ### Environment Variables
 
-Required for full functionality:
+Required for full functionality (these will be automatically set in the coding
+agent environment):
 
 - `DATABASE_URL` - PostgreSQL connection string
 - `APP_PASSKEY` - Application authentication key

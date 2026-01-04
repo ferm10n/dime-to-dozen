@@ -1,8 +1,7 @@
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import { db } from '../db/index.ts';
 import { budgetInsertSchema, expenses } from '../db/schema.ts';
 import { defineEndpoint, ensurePasskey, passkeySchema } from './util.ts';
-import { z } from 'zod/v4';
 
 export const getExpensesEndpoint = defineEndpoint({
   inputSchema: passkeySchema.extend({

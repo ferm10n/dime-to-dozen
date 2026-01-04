@@ -3,6 +3,7 @@ import '@std/dotenv/load';
 import { serveDir } from '@std/http/file-server';
 import { router } from './api/router.ts';
 import { ApiEndpointDef, parseOrDie } from './api/util.ts';
+import type { z } from 'zod/v4';
 
 // const secret = Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b => b.toString(16).padStart(2, "0")).join("");
 // console.log("Generated secret:", secret);
@@ -22,10 +23,10 @@ Deno.serve({
   try {
     const pathname = new URL(req.url).pathname;
 
-    const apiEndpoint: ApiEndpointDef<any, unknown> =
+    const apiEndpoint: ApiEndpointDef<z.ZodType | null, unknown> =
       router[pathname as keyof typeof router];
     if (apiEndpoint && req.method === 'POST') {
-      let body: any = null;
+      let body: unknown = null;
       if (apiEndpoint.inputSchema) {
         body = parseOrDie(apiEndpoint.inputSchema, await req.json());
       }

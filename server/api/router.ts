@@ -21,7 +21,7 @@ export const router = {
   '/api/copy-month-budget': copyMonthBudgetEndpoint,
   '/api/edit-budget-group': editBudgetGroupEndpoint,
 } satisfies {
-  [path: string]: ApiEndpointDef<any, any>;
+  [path: string]: ApiEndpointDef<z.ZodType | null, unknown>;
 };
 
 export type ApiRouter = {
