@@ -41,8 +41,4 @@ jobs:
 
       - name: start local db and insert sample data
         run: |
-          ls .
-          ls ./scripts
-          which bash
-          cat ./scripts/start-local-db.sh
-          ./scripts/start-local-db.sh
+          ./scripts/setup-local-db.sh
