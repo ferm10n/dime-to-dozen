@@ -15,6 +15,18 @@ Playwright MCP for end-to-end browser automation. This includes:
 - Using Playwright MCP to automate navigation, form submissions, and error state
   capture
 
+### Playwright Authentication
+
+The application requires a passkey for access. When using Playwright MCP:
+
+1. The app will prompt for a passkey on first load via a browser dialog
+2. Handle the dialog by accepting it with the passkey value from the
+   `APP_PASSKEY` environment variable
+3. Use `playwright-browser_handle_dialog` tool with `accept: true` and
+   `promptText: "value of APP_PASSKEY"`
+4. Multiple dialog prompts may appear - handle each one until the app loads
+   successfully
+
 ## Working Effectively
 
 ### Bootstrap and Setup
