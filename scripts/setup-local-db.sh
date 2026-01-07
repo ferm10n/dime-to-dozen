@@ -18,8 +18,17 @@ docker run -d \
     -v ${CONTAINER_NAME}_data:/var/lib/postgresql/data \
     postgres:17
 
-# wait for availability by repeatedly trying to run a simple select
-until docker exec -it $CONTAINER_NAME pg_isready -U postgres > /dev/null 2>&1; do
+start_time=$(date +%s)
+while true; do
+    if docker exec -it $CONTAINER_NAME pg_isready -U postgres > /dev/null 2>&1; then
+        break
+    fi
+    elapsed=$(( $(date +%s) - start_time ))
+    if [ $elapsed -gt 30 ]; then
+        echo "Postgres did not become available after 30 seconds. Dumping container logs:"
+        docker logs $CONTAINER_NAME
+        exit 1
+    fi
     echo "Waiting for Postgres to be available..."
     sleep 1
 done
