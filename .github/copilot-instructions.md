@@ -21,10 +21,9 @@ The application requires a passkey for access. When using Playwright MCP:
 
 1. The app will prompt for a passkey on first load via a browser dialog
 2. Handle the dialog by accepting it with the passkey value from the
-   `APP_PASSKEY` environment variable (default: "supersecret" in the coding
-   agent environment)
+   `APP_PASSKEY` environment variable
 3. Use `playwright-browser_handle_dialog` tool with `accept: true` and
-   `promptText: "supersecret"` (or the value of `APP_PASSKEY`)
+   `promptText: "value of APP_PASSKEY"`
 4. Multiple dialog prompts may appear - handle each one until the app loads
    successfully
 
