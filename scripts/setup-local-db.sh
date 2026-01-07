@@ -20,7 +20,7 @@ docker run -d \
 
 start_time=$(date +%s)
 while true; do
-    if docker exec -it $CONTAINER_NAME pg_isready -U postgres > /dev/null 2>&1; then
+    if docker exec $CONTAINER_NAME pg_isready -U postgres > /dev/null 2>&1; then
         break
     fi
     elapsed=$(( $(date +%s) - start_time ))
