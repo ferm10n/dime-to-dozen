@@ -50,10 +50,6 @@ The application requires a passkey for access. When using Playwright MCP:
     Playwright MCP)
   - Hot reloading enabled
 - Start API server: `deno task serve`
-  - Requires DATABASE_URL environment variable to be set correctly
-  - If you see "getaddrinfo ENOTFOUND" errors, verify DATABASE_URL is set
-    properly without duplicate prefixes
-  - The backend will listen on http://localhost:6960/
 
 ### Code Quality
 
