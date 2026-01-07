@@ -15,6 +15,19 @@ Playwright MCP for end-to-end browser automation. This includes:
 - Using Playwright MCP to automate navigation, form submissions, and error state
   capture
 
+### Playwright Authentication
+
+The application requires a passkey for access. When using Playwright MCP:
+
+1. The app will prompt for a passkey on first load via a browser dialog
+2. Handle the dialog by accepting it with the passkey value from the
+   `APP_PASSKEY` environment variable (default: "supersecret" in the coding agent
+   environment)
+3. Use `playwright-browser_handle_dialog` tool with `accept: true` and
+   `promptText: "supersecret"` (or the value of `APP_PASSKEY`)
+4. Multiple dialog prompts may appear - handle each one until the app loads
+   successfully
+
 ## Working Effectively
 
 ### Bootstrap and Setup
@@ -38,6 +51,10 @@ Playwright MCP for end-to-end browser automation. This includes:
     Playwright MCP)
   - Hot reloading enabled
 - Start API server: `deno task serve`
+  - Requires DATABASE_URL environment variable to be set correctly
+  - If you see "getaddrinfo ENOTFOUND" errors, verify DATABASE_URL is set
+    properly without duplicate prefixes
+  - The backend will listen on http://localhost:6960/
 
 ### Code Quality
 
